@@ -42,7 +42,12 @@ struct ScaleView: View {
                     CurvePicker(label: "L-Curve", value: $scale.rCurve)
                 }
             }
-            Text("Scale pos: \(scale.scalePos)")
+            Picker("Scale Pos", selection: $scale.scalePos) {
+                ForEach(Scale.ScalePos.allCases) { pos in
+                    Text(pos.description).tag(pos)
+                }
+            }.pickerStyle(.segmented)
+
         }
         .fixedSize() // TODO: critical for performance
 

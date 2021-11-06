@@ -1,4 +1,5 @@
 import Foundation
+import LivenKit
 
 final class Envelope: ObservableObject {
     @Published public var L1: Int = 0;
@@ -41,10 +42,10 @@ final class Envelope: ObservableObject {
     }
 }
 
-extension Envelope: LivenReceiverDecodable {
-    typealias LivenReceiverType = LivenProto.TPDT.Envelope
+extension Envelope: LivenDecodable {
+    typealias LivenDecodeType = LivenProto.Envelope
 
-    public func updateFrom(liven e: LivenProto.TPDT.Envelope) {
+    public func updateFrom(liven e: LivenProto.Envelope) {
         L1 = Int(e.aLevel)
         L2 = Int(e.dLevel)
         L3 = Int(e.sLevel)

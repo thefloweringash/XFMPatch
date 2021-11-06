@@ -1,13 +1,13 @@
-protocol LivenReceiverDecodable {
-    associatedtype LivenReceiverType
+protocol LivenDecodable {
+    associatedtype LivenDecodeType
 
     init()
-    init(withLiven: LivenReceiverType)
-    func updateFrom(liven: LivenReceiverType) -> Void
+    init(withLiven: LivenDecodeType)
+    func updateFrom(liven: LivenDecodeType) -> Void
 }
 
-extension LivenReceiverDecodable {
-    init(withLiven liven: LivenReceiverType) {
+extension LivenDecodable {
+    init(withLiven liven: LivenDecodeType) {
         self.init()
         self.updateFrom(liven: liven)
     }

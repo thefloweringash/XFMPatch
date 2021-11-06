@@ -1,6 +1,7 @@
 import Foundation
 import CoreMIDI
 import Combine
+import LivenKit
 
 struct MIDIPort: Identifiable {
     var id: Int

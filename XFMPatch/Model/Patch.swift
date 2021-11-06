@@ -1,4 +1,5 @@
 import Foundation
+import LivenKit
 
 final class Patch: ObservableObject {
     @Published public var name: String
@@ -21,8 +22,8 @@ final class Patch: ObservableObject {
     }
 }
 
-extension Patch: LivenReceiverDecodable {
-    typealias LivenReceiverType = LivenProto.FMTC
+extension Patch: LivenDecodable {
+    typealias LivenDecodeType = LivenProto.FMTC
     
     public func updateFrom(liven fmtc: LivenProto.FMTC) {
         let tpdt = fmtc.tpdt
@@ -35,3 +36,4 @@ extension Patch: LivenReceiverDecodable {
         operators.3.updateFrom(liven: Operator.gatherParams(tpdt: tpdt, index: .Op4))
     }
 }
+

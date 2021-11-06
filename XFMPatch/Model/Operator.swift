@@ -1,4 +1,5 @@
 import Foundation
+import LivenKit
 
 final class Operator: ObservableObject {
     public enum Index {
@@ -8,9 +9,25 @@ final class Operator: ObservableObject {
         case Op4
     }
 
+    public enum OperatorMode: UInt8, Identifiable, CaseIterable, CustomStringConvertible {
+        case Ratio = 1
+        case Fixed = 2
+
+        var id: UInt8 {
+            get { self.rawValue }
+        }
+
+        var description: String {
+            switch self {
+            case .Ratio: return "Ratio"
+            case .Fixed: return "Fixed"
+            }
+        }
+    }
+
     @Published public var ratio: Float
-    @Published public var level: UInt8
-    @Published public var fixed: Bool
+    @Published public var level: Float
+    @Published public var mode: OperatorMode
     @Published public var frequency: Float
 
     public let envelope: Envelope
@@ -36,33 +53,33 @@ final class Operator: ObservableObject {
         scale: Scale
     ) {
         self.ratio = ratio
-        self.level = level
-        self.fixed = fixed
+        self.level = Float(level)
+        self.mode = fixed ? .Fixed : .Ratio
         self.frequency = frequency
         self.envelope = envelope
         self.scale = scale
     }
 }
 
-extension Operator: LivenReceiverDecodable {
-    typealias LivenReceiverType = (
-        LivenProto.TPDT.Fixed,
-        LivenProto.TPDT.Ratio,
-        LivenProto.TPDT.Envelope,
-        LivenProto.TPDT.Scale
+extension Operator: LivenDecodable {
+    typealias LivenDecodeType = (
+        LivenProto.Fixed,
+        LivenProto.Ratio,
+        LivenProto.Envelope,
+        LivenProto.Scale
     )
 
-    func updateFrom(liven: LivenReceiverType) {
+    func updateFrom(liven: LivenDecodeType) {
         let (f, r, e, s) = liven
         ratio = r.ratio
-        level = r.level
-        fixed = f.fixed
+        level = Float(r.level)
+        mode = f.fixed ? .Fixed : .Ratio
         frequency = f.frequency
         envelope.updateFrom(liven: e)
         scale.updateFrom(liven: s)
     }
 
-    public class func gatherParams(tpdt: LivenProto.TPDT, index: Index) -> LivenReceiverType {
+    public class func gatherParams(tpdt: LivenProto.TPDT, index: Index) -> LivenDecodeType {
         switch index {
         case .Op1: return (tpdt.fixed.0, tpdt.ratio.0, tpdt.envelope.0, tpdt.scale.0)
         case .Op2: return (tpdt.fixed.1, tpdt.ratio.1, tpdt.envelope.1, tpdt.scale.1)

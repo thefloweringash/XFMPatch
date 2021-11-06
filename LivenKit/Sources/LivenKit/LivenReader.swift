@@ -5,7 +5,7 @@ class LivenReader {
         case Underflow
         case UnknownPacket
         case InvalidFourCC
-        case FourCCMismatch
+        case FourCCMismatch(expected: String, actual: String)
         case InvalidString
         case IntegerOverflow
     }
@@ -72,11 +72,14 @@ class LivenReader {
     }
 
     public func containerReader(fourCC expectedFourCCStr: String) throws -> LivenReader {
-        let expectedFourCC = try fourCCToNumber(expectedFourCCStr)
+        let expectedFourCC = try LivenProto.fourCCToNumber(expectedFourCCStr)
         let actualFourCC = try readUInt(UInt32.self)
 
         guard actualFourCC == expectedFourCC else {
-            throw ReaderError.FourCCMismatch
+            throw ReaderError.FourCCMismatch(
+                expected: LivenProto.fourCCToString(expectedFourCC),
+                actual: LivenProto.fourCCToString(actualFourCC)
+            )
         }
 
         let length = Int(try readUInt(UInt32.self) - 8)
@@ -99,20 +102,4 @@ class LivenReader {
         }
         return result
     }
-
-    private func fourCCToNumber(_ fourCC: String) throws -> UInt32 {
-        guard fourCC.count == 4 else {
-            throw ReaderError.InvalidFourCC
-        }
-
-        var result: UInt32 = 0
-        for x in fourCC {
-            guard let a = x.asciiValue else {
-                throw ReaderError.InvalidFourCC
-            }
-            result = (result >> 8) | UInt32(a) << 24
-        }
-        return result
-    }
-
 }
