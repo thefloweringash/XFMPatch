@@ -165,6 +165,8 @@ struct EnvelopeEditor: View {
                 }
             }.frame(width: 400, height: 300)
 
+            
+
             VStack {
                 Text("L1: \(envelope.L1), T1: \(envelope.T1)")
                 Text("L2: \(envelope.L2), T2: \(envelope.T2)")
@@ -175,3 +177,9 @@ struct EnvelopeEditor: View {
     }
 }
 
+
+struct EnvelopeEditor_Previews: PreviewProvider {
+    static var previews: some View {
+        EnvelopeEditor(envelope: Envelope())
+    }
+}

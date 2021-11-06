@@ -13,10 +13,16 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Picker("MIDI Port", selection: $midiProvider.selectedPort) {
-                Text("None").tag(nil as Int?)
-                ForEach(midiProvider.ports) { port in
-                    Text(port.name).tag(port.id as Int?)
+            HStack {
+                Picker("MIDI Port", selection: $midiProvider.selectedPort) {
+                    Text("None").tag(nil as Int?)
+                    ForEach(midiProvider.ports) { port in
+                        Text(port.name).tag(port.id as Int?)
+                    }
+                }
+                Button("Engage") {
+                    let generated = patch.convertToLiven()
+                    debugPrint(generated)
                 }
             }
 

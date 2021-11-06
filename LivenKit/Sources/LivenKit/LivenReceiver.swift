@@ -120,17 +120,22 @@ public class LivenReceiver {
                     throw ReceiverError.ChecksumMismatch(expected: footer.checksum, actual: checksum)
                 }
 
-                try self.onTransfer(header: header, body: self.body, footer: footer)
+                self.onTransfer(header: header, body: self.body, footer: footer)
             }
         } catch {
-            print("Received transfer but could not decode patch: \(error)")
+            print("Error handling packet: \(error)")
+
         }
     }
 
-    private func onTransfer(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) throws {
-        let reader = LivenReader(withData: body)
-        let fmtc = try LivenProto.FMTC(withReader: reader)
-        receivedPatch.send(fmtc)
+    private func onTransfer(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) {
+        do {
+            let reader = LivenReader(withData: body)
+            let fmtc = try LivenProto.FMTC(withReader: reader)
+            receivedPatch.send(fmtc)
+        } catch {
+            print("Received transfer but could not decode patch: \(error)")
+        }
     }
 
     private func checksumPatch(_ buf: Data) -> UInt32 {

@@ -14,5 +14,26 @@ extension LivenProto {
             sLevel = try r.readUInt(UInt8.self)
             rLevel = try r.readUInt(UInt8.self)
         }
+
+        public init(
+            aTime: UInt8,
+            dTime: UInt8,
+            sTime: UInt8,
+            rTime: UInt8,
+            aLevel: UInt8,
+            dLevel: UInt8,
+            sLevel: UInt8,
+            rLevel: UInt8
+        ) {
+            self.aTime = aTime
+            self.dTime = dTime
+            self.sTime = sTime
+            self.rTime = rTime
+
+            self.aLevel = aLevel
+            self.dLevel = dLevel
+            self.sLevel = sLevel
+            self.rLevel = rLevel
+        }
     }
 }

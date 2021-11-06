@@ -16,5 +16,11 @@ extension LivenProto {
             fixed = try r.readUInt(UInt8.self) != 0
             frequencyTimes10 = try r.readUInt(type: UInt32.self, size: 3) // UInt24
         }
+
+        public init(fixed: Bool, frequency: Float) {
+            self.fixed = fixed
+            self.frequencyTimes10 = 0
+            self.frequency = frequency
+        }
     }
 }

@@ -18,5 +18,13 @@ extension LivenProto {
             level = try r.readUInt(UInt8.self)
             detune = try r.readInt(Int8.self)
         }
+
+        public init(ratio: Float, level: UInt8, detune: Int8) {
+            self.ratioTimes100 = 0
+            self.level = level
+            self.detune = detune
+
+            self.ratio = ratio
+        }
     }
 }

@@ -8,6 +8,7 @@ class LivenReader {
         case FourCCMismatch(expected: String, actual: String)
         case InvalidString
         case IntegerOverflow
+        case NotEmpty(remaining: Int)
     }
 
     private var buffer: Data
@@ -101,5 +102,11 @@ class LivenReader {
             throw ReaderError.InvalidString
         }
         return result
+    }
+
+    public func assertDrained() throws {
+        if !buffer.isEmpty {
+            throw ReaderError.NotEmpty(remaining: buffer.count)
+        }
     }
 }

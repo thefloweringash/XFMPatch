@@ -33,13 +33,21 @@ struct OperatorEditor: View {
                 } minimumValueLabel: {
                     Text("0.5")
                 } maximumValueLabel: {
-                    Text("9755")
+                    Text("32.00")
                 }
                 .disabled(op.mode != .Ratio)
 
                 Slider(
-                    value: $op.frequency, in: 1...9755, label: { Text("Frequency") }
-                ).disabled(op.mode != .Fixed)
+                    value: $op.frequency,
+                    in: 1...9831
+                ) {
+                    Text("Frequency")
+                } minimumValueLabel: {
+                    Text("1")
+                } maximumValueLabel: {
+                    Text("9831")
+                }
+                .disabled(op.mode != .Fixed)
             }
 
             ScaleView(scale: op.scale)

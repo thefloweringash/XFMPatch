@@ -45,8 +45,8 @@ public struct LivenProto {
     }
 
     public class FMTC {
-        public var boop1: UInt32
-        public var boop2: UInt32
+        public var boop1: UInt32 = 0
+        public var boop2: UInt32 = 2
         public var fmnm: FMNM
         public var tpdt: TPDT
 
@@ -57,6 +57,11 @@ public struct LivenProto {
             boop2 = try r.readUInt(UInt32.self)
             fmnm = try FMNM(withReader: r)
             tpdt = try TPDT(withReader: r)
+        }
+
+        public init(fmnm: FMNM, tpdt: TPDT) {
+            self.fmnm = fmnm
+            self.tpdt = tpdt
         }
     }
 }

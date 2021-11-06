@@ -39,7 +39,7 @@ struct ScaleView: View {
                 }
                 VStack {
                     GainSlider(label: "R-Gain", value: $scale.rGain)
-                    CurvePicker(label: "L-Curve", value: $scale.rCurve)
+                    CurvePicker(label: "R-Curve", value: $scale.rCurve)
                 }
             }
             Picker("Scale Pos", selection: $scale.scalePos) {

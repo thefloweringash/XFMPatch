@@ -2,9 +2,9 @@ import Foundation
 import LivenKit
 
 final class Envelope: ObservableObject {
-    @Published public var L1: Int = 0;
-    @Published public var L2: Int = 0;
-    @Published public var L3: Int = 0;
+    @Published public var L1: Int = 127;
+    @Published public var L2: Int = 127;
+    @Published public var L3: Int = 127;
     @Published public var L4: Int = 0;
 
     @Published public var T1: Int = 0;
@@ -12,23 +12,21 @@ final class Envelope: ObservableObject {
     @Published public var T3: Int = 0;
     @Published public var T4: Int = 0;
 
-    public init() {
-        self.L1 = 127
-        self.L2 = 127
-        self.L3 = 127
-        self.L4 = 0
+    @Published public var timescale: Int = 0
+    @Published public var upCrv: Int = 0
+    @Published public var downCrv: Int = 0
 
-        self.T1 = 0
-        self.T2 = 20
-        self.T3 = 20
-        self.T4 = 20
+    public init() {
     }
 
     public init(
         l1: Int, t1: Int,
         l2: Int, t2: Int,
         l3: Int, t3: Int,
-        l4: Int, t4: Int
+        l4: Int, t4: Int,
+        timescale: Int,
+        upCrv: Int,
+        downCrv: Int
     ) {
         self.L1 = l1
         self.L2 = l2
@@ -43,9 +41,10 @@ final class Envelope: ObservableObject {
 }
 
 extension Envelope: LivenDecodable {
-    typealias LivenDecodeType = LivenProto.Envelope
+    typealias LivenDecodeType = (LivenProto.Envelope, UInt8, LivenProto.Curve)
 
-    public func updateFrom(liven e: LivenProto.Envelope) {
+    public func updateFrom(liven: LivenDecodeType) {
+        let (e, ts, c) = liven
         L1 = Int(e.aLevel)
         L2 = Int(e.dLevel)
         L3 = Int(e.sLevel)
@@ -54,5 +53,28 @@ extension Envelope: LivenDecodable {
         T2 = Int(e.dTime)
         T3 = Int(e.sTime)
         T4 = Int(e.rTime)
+        timescale = Int(ts)
+        upCrv = Int(c.up)
+        downCrv = Int(c.down)
+    }
+}
+
+extension Envelope: LivenEncodable {
+    typealias LivenEncodeType = (LivenProto.Envelope, UInt8, LivenProto.Curve)
+
+    public func convertToLiven() -> LivenEncodeType {
+        let e = LivenProto.Envelope.init(
+            aTime: UInt8(T1),
+            dTime: UInt8(T2),
+            sTime: UInt8(T3),
+            rTime: UInt8(T4),
+            aLevel: UInt8(L1),
+            dLevel: UInt8(L2),
+            sLevel: UInt8(L3),
+            rLevel: UInt8(L4)
+        )
+        let ts = UInt8(timescale)
+        let c = LivenProto.Curve.init(up: Int8(upCrv), down: Int8(downCrv))
+        return (e, ts, c)
     }
 }
