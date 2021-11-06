@@ -175,23 +175,3 @@ struct EnvelopeEditor: View {
     }
 }
 
-struct OperatorEditor: View {
-    @State public var op: Operator = Operator()
-
-    var body: some View {
-        EnvelopeEditor(envelope: op.envelope)
-    }
-}
-
-struct PatchEditor: View {
-    @ObservedObject public var patch: Patch
-
-    var body: some View {
-        HStack {
-            OperatorEditor(op: patch.op1)
-            OperatorEditor(op: patch.op2)
-            OperatorEditor(op: patch.op3)
-            OperatorEditor(op: patch.op4)
-        }
-    }
-}

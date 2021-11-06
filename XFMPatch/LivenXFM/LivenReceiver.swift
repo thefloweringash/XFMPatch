@@ -1,16 +1,16 @@
 import Foundation
 import Combine
 
+enum LivenPacketType: UInt8 {
+    case Header = 0x1
+    case Body = 0x2
+    case Footer = 0x3
+}
+
 class LivenReceiver {
     enum State {
         case Waiting
         case ReadingBody
-    }
-
-    enum PacketType: UInt8 {
-        case Header = 0x1
-        case Body = 0x2
-        case Footer = 0x3
     }
 
     enum ReceiverError: Error {
@@ -18,7 +18,7 @@ class LivenReceiver {
         case UnmatchedBody
     }
 
-    public var receivedPatch = CurrentValueSubject<FMTC?, Never>(nil)
+    public var receivedPatch = CurrentValueSubject<LivenProto.FMTC?, Never>(nil)
 
     // MARK: Reading Bytes
 
@@ -82,20 +82,20 @@ class LivenReceiver {
 
     // MARK: Reading Packets
 
-    private var header: HeaderPacket?
+    private var header: LivenProto.HeaderPacket?
     private var body = Data()
 
     private func onPacket(_ packet: Data) throws {
         // print("onPacket(\(self.hex(packet))")
 
-        let reader = Reader(withData: packet)
+        let reader = LivenReader(withData: packet)
 
         // Constant header
         try reader.skip(bytes: 6)
 
         switch try reader.readType() {
         case .Header:
-            self.header = try HeaderPacket.init(fromReader: reader)
+            self.header = try LivenProto.HeaderPacket.init(fromReader: reader)
             self.body = Data()
         case .Body:
             guard self.header != nil else {
@@ -106,15 +106,15 @@ class LivenReceiver {
             guard let header = self.header else {
                 throw ReceiverError.UnmatchedFooter
             }
-            let footer = try FooterPacket(fromReader: reader)
+            let footer = try LivenProto.FooterPacket(fromReader: reader)
             try self.onTransfer(header: header, body: self.body, footer: footer)
         }
     }
 
 
-    private func onTransfer(header: HeaderPacket, body: Data, footer: FooterPacket) throws {
-        let reader = Reader(withData: body)
-        let fmtc = try FMTC(withReader: reader)
+    private func onTransfer(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) throws {
+        let reader = LivenReader(withData: body)
+        let fmtc = try LivenProto.FMTC(withReader: reader)
         receivedPatch.send(fmtc)
     }
 
@@ -158,247 +158,4 @@ class LivenReceiver {
         return bytes.map { String(format: "0x%.2c", $0) }.joined(separator: " ")
     }
 
-
-    // TODO: there must be a standard one of these somewhere
-    class Reader {
-        enum ReaderError: Error {
-            case Underflow
-            case UnknownPacket
-            case InvalidFourCC
-            case FourCCMismatch
-            case InvalidString
-            case IntegerOverflow
-        }
-
-        private var buffer: Data
-        init(withData data: Data) {
-            self.buffer = data
-        }
-
-        public func readUInt<T: UnsignedInteger>(_ type: T.Type) throws -> T {
-            return try readUInt(type: type, size: MemoryLayout<T>.size)
-        }
-
-        // Convert a number of bytes
-        public func readUInt<T: UnsignedInteger>(type _: T.Type, size: Int) throws -> T {
-            guard size <= MemoryLayout<T>.size else {
-                throw ReaderError.IntegerOverflow
-            }
-            guard buffer.count >= size else {
-                throw ReaderError.Underflow
-            }
-
-            let shift = (size - 1) << 3
-
-            var result: T = 0
-            for b in buffer.prefix(size) {
-                result = result >> 8 | T(b) << shift
-            }
-            buffer = buffer.advanced(by: size)
-            return result
-        }
-
-        public func readInt<T: SignedInteger>(_ type: T.Type) throws -> T where T.Magnitude : UnsignedInteger {
-            return T(truncatingIfNeeded: try readUInt(type.Magnitude))
-        }
-
-        public func readType() throws -> PacketType {
-            guard let result =  PacketType.init(rawValue: try self.readUInt(UInt8.self)) else {
-                throw ReaderError.UnknownPacket
-            }
-            return result
-        }
-
-        public func skip(bytes: Int) throws {
-            guard buffer.count >= bytes else {
-                throw ReaderError.Underflow
-            }
-            buffer = buffer.advanced(by: bytes)
-        }
-
-        public func read(bytes: Int) throws -> Data {
-            guard buffer.count >= bytes else {
-                throw ReaderError.Underflow
-            }
-            let result = buffer.prefix(bytes)
-            buffer = buffer.advanced(by: bytes)
-            return result
-        }
-
-        public func rest() -> Data{
-            let result = buffer
-            buffer = buffer.advanced(by: buffer.count)
-            return result
-        }
-
-        public func containerReader(fourCC expectedFourCCStr: String) throws -> Reader {
-            let expectedFourCC = try fourCCToNumber(expectedFourCCStr)
-            let actualFourCC = try readUInt(UInt32.self)
-
-            guard actualFourCC == expectedFourCC else {
-                throw ReaderError.FourCCMismatch
-            }
-
-            let length = Int(try readUInt(UInt32.self) - 8)
-
-            guard buffer.count >= length else {
-                throw ReaderError.Underflow
-            }
-
-            let subRange = buffer.prefix(length)
-            buffer = buffer.advanced(by: length)
-
-            return Reader(withData: subRange)
-        }
-
-        public func readPascalString<T: UnsignedInteger>(_ type: T.Type) throws -> String {
-            let length = Int(try readUInt(type))
-            let body = try read(bytes: length)
-            guard let result = String(data: body, encoding: .ascii) else {
-                throw ReaderError.InvalidString
-            }
-            return result
-        }
-
-        private func fourCCToNumber(_ fourCC: String) throws -> UInt32 {
-            guard fourCC.count == 4 else {
-                throw ReaderError.InvalidFourCC
-            }
-
-            var result: UInt32 = 0
-            for x in fourCC {
-                guard let a = x.asciiValue else {
-                    throw ReaderError.InvalidFourCC
-                }
-                result = (result >> 8) | UInt32(a) << 24
-            }
-            return result
-        }
-
-    }
-
-    struct HeaderPacket {
-        public var unknown: UInt32
-        public var length: UInt32
-
-        init(fromReader reader: Reader) throws {
-            unknown = try reader.readUInt(UInt32.self)
-            length = try reader.readUInt(UInt32.self)
-        }
-    }
-
-    struct FooterPacket {
-        public var checksum: UInt32
-        init(fromReader reader: Reader) throws {
-            checksum = try reader.readUInt(UInt32.self)
-        }
-    }
-
-    class FMNM {
-        public var boop1: UInt32
-        public var name: String
-
-        init(withReader outerReader: Reader) throws {
-            let r = try outerReader.containerReader(fourCC: "FMNM")
-            boop1 = try r.readUInt(UInt32.self)
-            name = try r.readPascalString(UInt32.self)
-        }
-    }
-
-    class TPDT {
-        class Fixed {
-            public var fixed: Bool
-            public var frequencyTimes10: UInt32
-
-            var frequency: Float {
-                get {
-                    return Float(frequencyTimes10) / 10
-                }
-                set {
-                    frequencyTimes10 = UInt32(newValue * 10)
-                }
-            }
-
-            init(withReader r: Reader) throws {
-                fixed = try r.readUInt(UInt8.self) != 0
-                frequencyTimes10 = try r.readUInt(type: UInt32.self, size: 3) // UInt24
-            }
-        }
-
-        class Ratio {
-            public var ratioTimes100: UInt16
-            public var level: UInt8
-            public var detune: Int8
-
-            init(withReader r: Reader) throws {
-                ratioTimes100 = try r.readUInt(UInt16.self)
-                level = try r.readUInt(UInt8.self)
-                detune = try r.readInt(Int8.self)
-            }
-        }
-
-        class Envelope {
-            public var aTime, dTime, sTime, rTime: UInt8
-            public var aLevel, dLevel, sLevel, rLevel: UInt8
-
-            init(withReader r: Reader) throws {
-                aTime = try r.readUInt(UInt8.self)
-                dTime = try r.readUInt(UInt8.self)
-                sTime = try r.readUInt(UInt8.self)
-                rTime = try r.readUInt(UInt8.self)
-
-                aLevel = try r.readUInt(UInt8.self)
-                dLevel = try r.readUInt(UInt8.self)
-                sLevel = try r.readUInt(UInt8.self)
-                rLevel = try r.readUInt(UInt8.self)
-            }
-        }
-
-        public var boop1: UInt32
-        public var boop2: UInt32
-        public var boop3: UInt32
-
-        public var fixed: (Fixed, Fixed, Fixed, Fixed)
-        public var ratio: (Ratio, Ratio, Ratio, Ratio)
-        public var envelope: (Envelope, Envelope, Envelope, Envelope)
-
-        init(withReader outerReader: Reader) throws {
-            let r = try outerReader.containerReader(fourCC: "TPDT")
-
-            boop1 = try r.readUInt(UInt32.self)
-            boop2 = try r.readUInt(UInt32.self)
-            boop3 = try r.readUInt(UInt32.self)
-
-            fixed.0 = try Fixed(withReader: r)
-            fixed.1 = try Fixed(withReader: r)
-            fixed.2 = try Fixed(withReader: r)
-            fixed.3 = try Fixed(withReader: r)
-
-            ratio.0 = try Ratio(withReader: r)
-            ratio.1 = try Ratio(withReader: r)
-            ratio.2 = try Ratio(withReader: r)
-            ratio.3 = try Ratio(withReader: r)
-
-            envelope.0 = try Envelope(withReader: r)
-            envelope.1 = try Envelope(withReader: r)
-            envelope.2 = try Envelope(withReader: r)
-            envelope.3 = try Envelope(withReader: r)
-        }
-    }
-
-    class FMTC {
-        public var boop1: UInt32
-        public var boop2: UInt32
-        public var fmnm: FMNM
-        public var tpdt: TPDT
-
-        init(withReader outerReader: Reader) throws {
-            let r = try outerReader.containerReader(fourCC: "FMTC")
-
-            boop1 = try r.readUInt(UInt32.self)
-            boop2 = try r.readUInt(UInt32.self)
-            fmnm = try FMNM(withReader: r)
-            tpdt = try TPDT(withReader: r)
-        }
-    }
 }

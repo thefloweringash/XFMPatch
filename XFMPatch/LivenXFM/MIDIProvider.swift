@@ -118,9 +118,9 @@ class MIDIProvider: ObservableObject {
         }
     }
 
-    public var receivedPatch = CurrentValueSubject<LivenReceiver.FMTC?, Never>(nil)
+    public var receivedPatch = CurrentValueSubject<LivenProto.FMTC?, Never>(nil)
 
-    private func onPatch(fmtc: LivenReceiver.FMTC) {
+    private func onPatch(fmtc: LivenProto.FMTC) {
         DispatchQueue.main.async {
             self.receivedPatch.send(fmtc)
         }

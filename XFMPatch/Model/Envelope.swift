@@ -1,6 +1,6 @@
 import Foundation
 
-class Envelope: ObservableObject {
+final class Envelope: ObservableObject {
     @Published public var L1: Int = 0;
     @Published public var L2: Int = 0;
     @Published public var L3: Int = 0;
@@ -38,5 +38,20 @@ class Envelope: ObservableObject {
         self.T2 = t2
         self.T3 = t3
         self.T4 = t4
+    }
+}
+
+extension Envelope: LivenReceiverDecodable {
+    typealias LivenReceiverType = LivenProto.TPDT.Envelope
+
+    public func updateFrom(liven e: LivenProto.TPDT.Envelope) {
+        L1 = Int(e.aLevel)
+        L2 = Int(e.dLevel)
+        L3 = Int(e.sLevel)
+        L4 = Int(e.rLevel)
+        T1 = Int(e.aTime)
+        T2 = Int(e.dTime)
+        T3 = Int(e.sTime)
+        T4 = Int(e.rTime)
     }
 }
