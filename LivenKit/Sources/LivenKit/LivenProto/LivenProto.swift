@@ -63,6 +63,4 @@ public struct LivenProto {
             checksum = try reader.readInt(UInt32.self)
         }
     }
-
-
 }

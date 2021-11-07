@@ -12,39 +12,30 @@ struct ContentView: View {
     @EnvironmentObject public var patchStorage: PatchStorage
 
     var body: some View {
-        VStack {
-            HStack {
-                Picker("MIDI Port", selection: $midiProvider.selectedPort) {
-                    Text("None").tag(nil as Int?)
-                    ForEach(midiProvider.ports) { port in
-                        Text(port.name).tag(port.id as Int?)
-                    }
-                }
-//                Button("Engage") {
-//                    let generated = patch.convertToLiven()
-//                    debugPrint(generated)
-//                }
-            }
-
-            NavigationView() {
-                List(patchStorage.data) { p in
-                    switch p {
-                    case .Bank(let bank, serial: _):
-                        DisclosureGroup(bank.name) {
-                            ForEach(bank.patches) { patch in
-                                NavigationLink(patch.name) {
-                                    PatchView(patch: patch)
-                                }
+        NavigationView() {
+            List(patchStorage.data) { p in
+                switch p {
+                case .Bank(let bank, serial: _):
+                    DisclosureGroup(bank.name) {
+                        ForEach(bank.patches) { patch in
+                            NavigationLink(patch.name) {
+                                PatchView(patch: patch).navigationTitle(patch.name)
                             }
                         }
-                    case .Patch(let patch, serial: _):
-                        NavigationLink(patch.name) {
-                            PatchView(patch: patch)
-                        }
+                    }
+                case .Patch(let patch, serial: _):
+                    NavigationLink(patch.name) {
+                        PatchView(patch: patch).navigationTitle(patch.name)
                     }
                 }
-                Text("there")
-                // PatchView(patch: patch)
+            }
+            Text("Select a patch")
+        }.toolbar {
+            Picker("MIDI Port", selection: $midiProvider.selectedPort) {
+                Text("None").tag(nil as Int?)
+                ForEach(midiProvider.ports) { port in
+                    Text(port.name).tag(port.id as Int?)
+                }
             }
         }
     }

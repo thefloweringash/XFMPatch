@@ -5,7 +5,6 @@ public class LivenWriter {
         case IntegerOverflow
         case ContainerOverflow(expected: Int, actual: Int)
         case ContainerUnderflow(expected: Int, actual: Int)
-
     }
 
     private var buffer = Data()

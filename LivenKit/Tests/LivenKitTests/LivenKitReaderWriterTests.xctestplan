@@ -14,7 +14,7 @@
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:",
+        "containerPath" : "container:LivenKit",
         "identifier" : "LivenKitTests",
         "name" : "LivenKitTests"
       }
