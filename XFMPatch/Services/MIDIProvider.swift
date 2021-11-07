@@ -49,10 +49,14 @@ class MIDIProvider: ObservableObject {
 
     private func initClient() {
         let notifyProc: MIDINotifyBlock = { [weak self] (event: UnsafePointer<MIDINotification>) in
-            guard self != nil else {
+            guard let self = self else {
                 return
             }
-            print("received midi notification: \(String(describing: event))")
+            let message = event.pointee.messageID
+            if message == .msgObjectAdded || message == .msgObjectRemoved {
+                self.enumSources()
+            }
+            print("received midi notification: \(String(reflecting: event.pointee.messageID))")
         }
 
         try! checkOSStatus(
@@ -104,7 +108,7 @@ class MIDIProvider: ObservableObject {
         }
 
         if midiConnectedSource != 0 {
-            MIDIPortDisconnectSource(midiInputPort, midiConnectedSource)
+            try! checkOSStatus(MIDIPortDisconnectSource(midiInputPort, midiConnectedSource))
         }
 
         print("opening source: midiInputPort=\(midiInputPort) source=\(source)")

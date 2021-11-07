@@ -83,7 +83,7 @@ public class LivenReceiver {
         
     }
 
-    // MARK: Reading Bytes
+    // MARK: - Reading Bytes
 
     private var buffer = Data()
     private var state: State = .Waiting
@@ -143,7 +143,7 @@ public class LivenReceiver {
         self.onPacket(buf)
     }
 
-    // MARK: Reading Packets
+    // MARK: - Reading Packets
 
     private var header: LivenProto.HeaderPacket?
     private var body = Data()
@@ -213,6 +213,8 @@ public class LivenReceiver {
             ],
             terminationHandler: nil)
     }
+
+    // MARK: - Handling completed transfers
 
     private func onTransfer(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) {
         do {
