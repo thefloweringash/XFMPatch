@@ -1,7 +1,7 @@
 import Foundation
 import LivenKit
 
-final class Patch: ObservableObject {
+final class Patch: ObservableObject, Identifiable {
     @Published public var name: String
 
     public let operators: (Operator, Operator, Operator, Operator)
@@ -11,6 +11,15 @@ final class Patch: ObservableObject {
     public convenience init() {
         self.init(
             name: "INIT",
+            operators: (Operator(), Operator(), Operator(), Operator()),
+            matrix: Matrix(),
+            pitchEnvelope: PitchEG()
+        )
+    }
+
+    public convenience init(name: String) {
+        self.init(
+            name: name,
             operators: (Operator(), Operator(), Operator(), Operator()),
             matrix: Matrix(),
             pitchEnvelope: PitchEG()
@@ -28,6 +37,10 @@ final class Patch: ObservableObject {
         self.matrix = matrix
         self.pitchEnvelope = pitchEnvelope
     }
+
+    typealias ID = String
+
+    var id: String { name }
 }
 
 extension Patch: LivenDecodable {

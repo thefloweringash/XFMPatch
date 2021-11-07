@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject public var midiProvider: MIDIProvider
-    @StateObject public var patch = Patch()
+    @EnvironmentObject public var patchStorage: PatchStorage
 
     var body: some View {
         VStack {
@@ -20,21 +20,33 @@ struct ContentView: View {
                         Text(port.name).tag(port.id as Int?)
                     }
                 }
-                Button("Engage") {
-                    let generated = patch.convertToLiven()
-                    debugPrint(generated)
-                }
+//                Button("Engage") {
+//                    let generated = patch.convertToLiven()
+//                    debugPrint(generated)
+//                }
             }
 
-            Spacer(minLength: 18)
-
-            PatchView(patch: patch)
-
-            Spacer()
-        }.onReceive(midiProvider.receivedPatch, perform: { newPatch in
-            guard let newPatch = newPatch else { return }
-            patch.updateFrom(liven: newPatch)
-        }).padding(18)
+            NavigationView() {
+                List(patchStorage.data) { p in
+                    switch p {
+                    case .Bank(let bank, serial: _):
+                        DisclosureGroup(bank.name) {
+                            ForEach(bank.patches) { patch in
+                                NavigationLink(patch.name) {
+                                    PatchView(patch: patch)
+                                }
+                            }
+                        }
+                    case .Patch(let patch, serial: _):
+                        NavigationLink(patch.name) {
+                            PatchView(patch: patch)
+                        }
+                    }
+                }
+                Text("there")
+                // PatchView(patch: patch)
+            }
+        }
     }
 }
 

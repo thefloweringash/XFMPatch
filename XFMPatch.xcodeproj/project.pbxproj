@@ -26,6 +26,8 @@
 		486AB7EB27364DD800A21610 /* ScaleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486AB7EA27364DD800A21610 /* ScaleView.swift */; };
 		48AE1A3C2737921C00E6BF3C /* PitchEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE1A3B2737921C00E6BF3C /* PitchEnvelope.swift */; };
 		48AE1A3E2737945300E6BF3C /* PitchEGView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE1A3D2737945300E6BF3C /* PitchEGView.swift */; };
+		48AE1A402737D2A400E6BF3C /* Bank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE1A3F2737D2A400E6BF3C /* Bank.swift */; };
+		48AE1A422737D5BA00E6BF3C /* PatchStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE1A412737D5BA00E6BF3C /* PatchStorage.swift */; };
 		48D0BE862736884E003EE84A /* LivenEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D0BE852736884E003EE84A /* LivenEncodable.swift */; };
 		48D0BEA327368DB8003EE84A /* LivenKit in Frameworks */ = {isa = PBXBuildFile; productRef = 48D0BEA227368DB8003EE84A /* LivenKit */; };
 		48D0BEA52736B6AE003EE84A /* MatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D0BEA42736B6AE003EE84A /* MatrixView.swift */; };
@@ -75,6 +77,8 @@
 		486AB7EA27364DD800A21610 /* ScaleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaleView.swift; sourceTree = "<group>"; };
 		48AE1A3B2737921C00E6BF3C /* PitchEnvelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PitchEnvelope.swift; sourceTree = "<group>"; };
 		48AE1A3D2737945300E6BF3C /* PitchEGView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PitchEGView.swift; sourceTree = "<group>"; };
+		48AE1A3F2737D2A400E6BF3C /* Bank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bank.swift; sourceTree = "<group>"; };
+		48AE1A412737D5BA00E6BF3C /* PatchStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorage.swift; sourceTree = "<group>"; };
 		48D0BE852736884E003EE84A /* LivenEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenEncodable.swift; sourceTree = "<group>"; };
 		48D0BEA027368D51003EE84A /* LivenKit */ = {isa = PBXFileReference; lastKnownFileType = text; path = LivenKit; sourceTree = SOURCE_ROOT; };
 		48D0BEA42736B6AE003EE84A /* MatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixView.swift; sourceTree = "<group>"; };
@@ -177,6 +181,7 @@
 				486AB7E62736489200A21610 /* LivenDecodable.swift */,
 				48D0BE852736884E003EE84A /* LivenEncodable.swift */,
 				4802E440272E4AB700E11B33 /* Patch.swift */,
+				48AE1A3F2737D2A400E6BF3C /* Bank.swift */,
 				4802E43E272E4A8800E11B33 /* Operator.swift */,
 				48D0BEAA2737706C003EE84A /* OperatorEnvelope.swift */,
 				48AE1A3B2737921C00E6BF3C /* PitchEnvelope.swift */,
@@ -205,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				486AB7D8273414D700A21610 /* MIDIProvider.swift */,
+				48AE1A412737D5BA00E6BF3C /* PatchStorage.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -359,6 +365,7 @@
 				48D0BEAD2737749C003EE84A /* EnvelopeView.swift in Sources */,
 				48AE1A3C2737921C00E6BF3C /* PitchEnvelope.swift in Sources */,
 				4802E43A272E449D00E11B33 /* OperatorEnvelopeView.swift in Sources */,
+				48AE1A422737D5BA00E6BF3C /* PatchStorage.swift in Sources */,
 				4802E441272E4AB700E11B33 /* Patch.swift in Sources */,
 				486AB7E12736420400A21610 /* OperatorView.swift in Sources */,
 				4802E43D272E4A7A00E11B33 /* Envelope.swift in Sources */,
@@ -366,6 +373,7 @@
 				48D0BEA72736B6C6003EE84A /* Matrix.swift in Sources */,
 				48D0BEA52736B6AE003EE84A /* MatrixView.swift in Sources */,
 				486AB7EB27364DD800A21610 /* ScaleView.swift in Sources */,
+				48AE1A402737D2A400E6BF3C /* Bank.swift in Sources */,
 				486AB7D9273414D700A21610 /* MIDIProvider.swift in Sources */,
 				48AE1A3E2737945300E6BF3C /* PitchEGView.swift in Sources */,
 			);

@@ -19,6 +19,7 @@ class MIDIProvider: ObservableObject {
         }
     }
 
+
     @Published public var ports: [MIDIPort] = []
 
     private var midiClient: MIDIClientRef = 0
@@ -30,14 +31,14 @@ class MIDIProvider: ObservableObject {
 
     private var subscriptions = Set<AnyCancellable>()
 
+
     init() {
         initClient()
         enumSources()
 
-        receiver.receivedPatch.sink { [weak self] (patch) in
+        receiver.inboundTransfers.sink { [weak self] (s) in
             guard let self = self else { return }
-            guard let patch = patch else { return }
-            self.onPatch(fmtc: patch)
+            self.receivedStruct.send(s)
         }.store(in: &subscriptions)
     }
 
@@ -119,11 +120,5 @@ class MIDIProvider: ObservableObject {
         }
     }
 
-    public var receivedPatch = CurrentValueSubject<LivenProto.FMTC?, Never>(nil)
-
-    private func onPatch(fmtc: LivenProto.FMTC) {
-        DispatchQueue.main.async {
-            self.receivedPatch.send(fmtc)
-        }
-    }
+    public var receivedStruct = PassthroughSubject<AnyLivenStruct, Never>()
 }

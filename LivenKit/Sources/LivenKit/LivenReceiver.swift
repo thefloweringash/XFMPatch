@@ -8,6 +8,60 @@ enum LivenPacketType: UInt8 {
     case Footer = 0x3
 }
 
+public enum AnyLivenStruct {
+    case Name(_: LivenProto.FMNM)
+    case BankContainer(_: LivenProto.FMBC)
+    case TemplateContainer(_: LivenProto.FMTC)
+    case BankData(_: LivenProto.BKDT)
+    case TemplateData(_: LivenProto.TPDT)
+}
+
+public enum LivenStructType: String {
+    case Name = "FMNM"
+    case BankContainer = "FMBC"
+    case TemplateContainer = "FMTC"
+    case BankData = "BKDT"
+    case TemplateData = "TPDT"
+
+    var fourCC: UInt32 {
+        try! LivenProto.fourCCToNumber(rawValue)
+    }
+
+    var crcXorIn: UInt32? {
+        switch self {
+        case .TemplateContainer: return 0x6046f7ed
+        case .BankContainer: return 0xfb01478d
+        default:
+            return nil
+        }
+    }
+
+    var initVal: UInt32? {
+        guard let crcXorIn = self.crcXorIn else { return nil }
+        return ~crcXorIn
+    }
+
+    static func fromFourCC(_ fourCC: UInt32) -> Self? {
+        LivenStructType(rawValue: LivenProto.fourCCToString(fourCC))
+    }
+
+    func decode(withData buf: Data) throws -> AnyLivenStruct {
+        let r = LivenReader(withData: buf)
+        switch self {
+        case .Name:
+            return .Name(try LivenProto.FMNM(withReader: r))
+        case .BankContainer:
+            return .BankContainer(try LivenProto.FMBC(withReader: r))
+        case .TemplateContainer:
+            return .TemplateContainer(try LivenProto.FMTC(withReader: r))
+        case .BankData:
+            return .BankData(try LivenProto.BKDT(withReader: r))
+        case .TemplateData:
+            return .TemplateData(try LivenProto.TPDT(withReader: r))
+        }
+    }
+}
+
 public class LivenReceiver {
     enum State {
         case Waiting
@@ -18,9 +72,12 @@ public class LivenReceiver {
         case UnmatchedFooter
         case UnmatchedBody
         case ChecksumMismatch(expected: UInt32, actual: UInt32)
+        case UnknownContainer(type: String)
+        case UnexpectedContainer(type: LivenStructType)
+
     }
 
-    public var receivedPatch = CurrentValueSubject<LivenProto.FMTC?, Never>(nil)
+    public var inboundTransfers = PassthroughSubject<AnyLivenStruct, Never>()
 
     public init() {
         
@@ -115,34 +172,85 @@ public class LivenReceiver {
                 }
                 let footer = try LivenProto.FooterPacket(fromReader: reader)
 
-                let checksum = self.checksumPatch(body)
-                guard footer.checksum == checksum else {
-                    throw ReceiverError.ChecksumMismatch(expected: footer.checksum, actual: checksum)
-                }
-
                 self.onTransfer(header: header, body: self.body, footer: footer)
             }
         } catch {
             print("Error handling packet: \(error)")
-
         }
+    }
+
+    private func debugDump(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) throws {
+        let dir = try FileManager.default.url(
+            for: .itemReplacementDirectory,
+               in: .userDomainMask,
+               appropriateFor: URL(fileURLWithPath: "/Users/"),
+               create: true)
+
+
+        let description = """
+          Header:
+            unknown: \(header.unknown)
+          Checksum: \(footer.checksum)
+        """
+
+        try description.write(
+            to: dir.appendingPathComponent("summary.txt"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let patch = dir.appendingPathComponent("body.bin")
+        try body.write(to: patch)
+
+        print("Exported debug dump to \(dir)")
+
+        try Process.run(
+            URL(fileURLWithPath: "/nix/store/bkp2nl65nbzjkvg2nypxxdjns7c13g8p-bash-5.1-p8/bin/bash"),
+            arguments: [
+                "/nix/store/vmdvgws6qp0gav4yrfk72y26dyqpm7qw-python3-3.9.6-env/bin/python3",
+                "/Users/lorne/src/liven-xfm/firmware/bank.py",
+                patch.path,
+            ],
+            terminationHandler: nil)
     }
 
     private func onTransfer(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) {
         do {
-            let reader = LivenReader(withData: body)
-            let fmtc = try LivenProto.FMTC(withReader: reader)
-            receivedPatch.send(fmtc)
+            do {
+                print("onTransfer: decoding received container")
+                try debugDump(header: header, body: body, footer: footer)
+            } catch {
+                print("Debug dump failed")
+            }
+
+            // TODO: peek?
+            let type = try LivenReader(withData: body).readInt(UInt32.self)
+
+            guard let container = LivenStructType.fromFourCC(type) else {
+                throw ReceiverError.UnknownContainer(type: LivenProto.fourCCToString(type))
+            }
+
+            guard let initVal = container.initVal else {
+                throw ReceiverError.UnexpectedContainer(type: container)
+            }
+
+            let checksum = self.checksum(initVal: initVal, buf: body)
+            if footer.checksum != checksum {
+                print("Warning: checksum failure")
+                // throw ReceiverError.ChecksumMismatch(expected: footer.checksum, actual: checksum)
+            }
+
+            inboundTransfers.send(try container.decode(withData: body))
         } catch {
             print("Received transfer but could not decode patch: \(error)")
         }
     }
 
-    private func checksumPatch(_ buf: Data) -> UInt32 {
+    private func checksum(initVal: UInt32, buf: Data) -> UInt32 {
         return buf.withUnsafeBytes { (p: UnsafePointer<Bytef>) -> UInt32 in
             // This may seem like a magic constant, but it's more likely a constant prefix
             // that I have yet determine.
-            return UInt32(crc32(~0x6046f7ed, p, UInt32(buf.count)))
+            return UInt32(crc32(uLong(initVal), p, UInt32(buf.count)))
         }
     }
 }

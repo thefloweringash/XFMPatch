@@ -19,7 +19,7 @@ extension LivenProto {
 
         public var curve: PerOp<Curve>
 
-        public var boop6: UInt32 = 0xffffff00
+        public var boop6: UInt32 = 0 // TODO: first byte is pattern level
 
         init(withReader outerReader: LivenReader) throws {
             let r = try outerReader.containerReader(fourCC: "TPDT")
