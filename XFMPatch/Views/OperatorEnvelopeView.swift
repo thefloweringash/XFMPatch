@@ -14,7 +14,6 @@ struct OperatorEnvelopeEditor: View {
             EnvelopeEditor(envelope: openv.envelope, levelMin: 0, levelMax: 127)
 
             VStack {
-                Text("Level: \(openv.level")
                 Text("L1: \(envelope.L1), T1: \(envelope.T1)")
                 Text("L2: \(envelope.L2), T2: \(envelope.T2)")
                 Text("L3: \(envelope.L3), T3: \(envelope.T3)")

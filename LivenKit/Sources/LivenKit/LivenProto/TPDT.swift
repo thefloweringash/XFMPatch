@@ -49,16 +49,16 @@ extension LivenProto {
         }
 
         public init(
-            fixed: (Fixed, Fixed, Fixed, Fixed),
-            ratio: (Ratio, Ratio, Ratio, Ratio),
-            envelope: (AmpEnvelope, AmpEnvelope, AmpEnvelope, AmpEnvelope),
+            fixed: PerOp<Fixed>,
+            ratio: PerOp<Ratio>,
+            envelope: PerOp<AmpEnvelope>,
             pitchEnvelope: PitchEnvelope,
-            scale: (Scale, Scale, Scale, Scale),
+            scale: PerOp<Scale>,
             matrix: Matrix,
-            velocity: (UInt8, UInt8, UInt8, UInt8),
-            timescale: (UInt8, UInt8, UInt8, UInt8),
-            pitchEG: (UInt8, UInt8, UInt8, UInt8),
-            curve: (Curve, Curve, Curve, Curve)
+            velocity: PerOp<UInt8>,
+            timescale: PerOp<UInt8>,
+            pitchEG: PerOp<UInt8>,
+            curve: PerOp<Curve>
         ) {
             self.fixed = fixed
             self.ratio = ratio
