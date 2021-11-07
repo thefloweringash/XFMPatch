@@ -27,7 +27,6 @@ final class Matrix: ObservableObject {
     @Published public var mr3: Float = 0
     @Published public var mr4: Float = 0
 
-
     init() {}
 
     private func clampFb(_ x: Float) -> Float {
@@ -75,7 +74,7 @@ extension Matrix: LivenEncodable {
     typealias LivenEncodeType = LivenProto.Matrix
 
     func convertToLiven() -> LivenProto.Matrix {
-        LivenProto.Matrix.init(
+        LivenProto.Matrix(
             operatorLevels: (
                 (Int8(o1fb), UInt8(o1r2), UInt8(o1r3), UInt8(o1r4)),
                 (UInt8(o2r1), Int8(o2fb), UInt8(o2r3), UInt8(o2r4)),

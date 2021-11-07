@@ -48,7 +48,7 @@ extension OperatorEnvelope: LivenEncodable {
     public func convertToLiven() -> LivenEncodeType {
         let e = envelope.convertToLiven()
         let ts = UInt8(timescale)
-        let c = LivenProto.Curve.init(up: Int8(upCrv), down: Int8(downCrv))
+        let c = LivenProto.Curve(up: Int8(upCrv), down: Int8(downCrv))
         return (e, ts, c)
     }
 }

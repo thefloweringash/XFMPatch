@@ -44,6 +44,7 @@ extension Patch: LivenDecodable {
         operators.3.updateFrom(liven: Operator.gatherParams(tpdt: tpdt, index: .Op4))
 
         matrix.updateFrom(liven: tpdt.matrix)
+        pitchEnvelope.updateFrom(liven: tpdt.pitchEnvelope)
     }
 }
 
@@ -56,8 +57,8 @@ extension Patch: LivenEncodable {
         let (o3f, o3r, o3e, o3s, o3v, o3ts, o3p, o3c) = operators.2.convertToLiven()
         let (o4f, o4r, o4e, o4s, o4v, o4ts, o4p, o4c) = operators.3.convertToLiven()
 
-        let fmnm = LivenProto.FMNM.init(name: name)
-        let tpdt = LivenProto.TPDT.init(
+        let fmnm = LivenProto.FMNM(name: name)
+        let tpdt = LivenProto.TPDT(
             fixed: (o1f, o2f, o3f, o4f),
             ratio: (o1r, o2r, o3r, o4r),
             envelope: (o1e, o2e, o3e, o4e),
@@ -69,6 +70,6 @@ extension Patch: LivenEncodable {
             pitchEG: (o1p, o2p, o3p, o4p),
             curve: (o1c, o2c, o3c, o4c)
         )
-        return LivenProto.FMTC.init(fmnm: fmnm, tpdt: tpdt)
+        return LivenProto.FMTC(fmnm: fmnm, tpdt: tpdt)
     }
 }

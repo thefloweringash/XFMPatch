@@ -44,63 +44,94 @@ struct EnvelopeShape: Shape {
     }
 }
 
+struct ZeroLine: Shape {
+    var envelopeGeometry: EnvelopeGeometry
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+
+        let bounds = envelopeGeometry.boundingRect
+        let y: CGFloat = envelopeGeometry.levelToY(0)
+
+        path.move(to: .init(x: bounds.origin.x,
+                            y: y))
+        path.addLine(to: .init(x: bounds.origin.x + bounds.size.width,
+                               y: y))
+
+        return path;
+    }
+}
+
 class EnvelopeGeometry {
-    public let envelope: AmpEnvelope
     public let boundingRect: CGRect
     private let timeTotal: CGFloat
+    private let levelMin: Int
+    private let levelMax: Int
 
-    init(envelope: AmpEnvelope, boundingRect: CGRect) {
-        self.envelope = envelope
+    // TODO: type erased envelope params
+    private let l: (Int, Int, Int, Int)
+    private let t: (Int, Int, Int, Int)
+
+    init<T>(envelope: Envelope<T>, levelMin: Int, levelMax: Int, boundingRect: CGRect) where T: FixedWidthInteger {
+        self.levelMin = levelMin
+        self.levelMax = levelMax
+
         self.boundingRect = boundingRect
+
+        self.l = envelope.levels
+        self.t = envelope.times
+
         self.timeTotal =
-        EnvelopeGeometry.timescale(envelope.T1) +
-        EnvelopeGeometry.timescale(envelope.T2) +
-        EnvelopeGeometry.timescale(envelope.T3) +
-        EnvelopeGeometry.timescale(envelope.T4);
+        EnvelopeGeometry.timescale(t.0) +
+        EnvelopeGeometry.timescale(t.1) +
+        EnvelopeGeometry.timescale(t.2) +
+        EnvelopeGeometry.timescale(t.3);
     }
 
     public var start: CGPoint {
         .init(
             x: boundingRect.origin.x,
-            y: levelToY(envelope.L4)
+            y: levelToY(l.3)
         )
     }
 
     public var p1: CGPoint {
         .init(
-            x: timeToX(envelope.T1),
-            y: levelToY(envelope.L1)
+            x: timeToX(t.0),
+            y: levelToY(l.0)
         )
     }
 
     public var p2: CGPoint {
         .init(
-            x: timeToX(envelope.T1, envelope.T2),
-            y: levelToY(envelope.L2)
+            x: timeToX(t.0, t.1),
+            y: levelToY(l.1)
         )
     }
 
     public var p3: CGPoint {
         .init(
-            x: timeToX(envelope.T1, envelope.T2, envelope.T3),
-            y: levelToY(envelope.L3)
+            x: timeToX(t.0, t.1, t.2),
+            y: levelToY(l.2)
         )
     }
 
     public var p4: CGPoint {
         .init(
-            x: timeToX(envelope.T1, envelope.T2, envelope.T3, envelope.T4),
-            y: levelToY(envelope.L4)
+            x: timeToX(t.0, t.1, t.2, t.3),
+            y: levelToY(l.3)
         )
     }
 
     public func yToLevel(_ y: CGFloat) -> Int {
-        let raw = Int((1 - ((y -  boundingRect.origin.y) / boundingRect.height)) * 127)
-        return min(127, max(raw, 0))
+        let scale = CGFloat(levelMax - levelMin) / boundingRect.size.height
+        let raw = levelMax - Int((y - boundingRect.origin.y) * scale)
+        return min(levelMax, max(levelMin, Int(raw)))
     }
 
     public func levelToY(_ level: Int) -> CGFloat {
-        boundingRect.origin.y + boundingRect.height * (1 - (CGFloat(level) / 127))
+        let scale = boundingRect.size.height / CGFloat(levelMax - levelMin)
+        return CGFloat(levelMax - level) * scale + boundingRect.origin.y
     }
 
     public func timeToX(_ times: Int...) -> CGFloat {
@@ -144,17 +175,27 @@ struct Handle: View {
     }
 }
 
-struct EnvelopeEditor: View {
-    @ObservedObject public var envelope: AmpEnvelope
+struct EnvelopeEditor<T>: View where T: FixedWidthInteger {
+    @ObservedObject public var envelope: Envelope<T>
+
+    public let levelMin: Int
+    public let levelMax: Int
 
     var body: some View {
         HStack {
             GeometryReader { (viewGeom) in
                 let envRect = viewGeom.frame(in: .local).insetBy(dx: 28, dy: 28)
-                let geometry = EnvelopeGeometry(envelope: envelope, boundingRect: envRect)
+                let geometry = EnvelopeGeometry(envelope: envelope,
+                                                levelMin: levelMin,
+                                                levelMax: levelMax,
+                                                boundingRect: envRect)
 
                 ZStack() {
                     GridBackground(envelopeGeometry: geometry)
+
+                    if levelMin != 0 {
+                        ZeroLine(envelopeGeometry: geometry).stroke(.green)
+                    }
 
                     EnvelopeShape(envelopeGeometry: geometry).stroke(.blue)
 
@@ -171,6 +212,10 @@ struct EnvelopeEditor: View {
 
 struct EnvelopeEditor_Previews: PreviewProvider {
     static var previews: some View {
-        EnvelopeEditor(envelope: Envelope())
+        EnvelopeEditor(
+            envelope: AmpEnvelope(),
+            levelMin: -48,
+            levelMax: 48
+        )
     }
 }

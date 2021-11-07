@@ -18,8 +18,10 @@ struct PatchView: View {
                         OperatorEditor(op: patch.operators.3)
                     }
                 }
-                MatrixView(matrix: patch.matrix)
-
+                VStack {
+                    MatrixView(matrix: patch.matrix)
+                    EnvelopeEditor(envelope: patch.pitchEnvelope, levelMin: -48, levelMax: 48)
+                }
             }
         }
     }

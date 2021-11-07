@@ -6,7 +6,7 @@ struct OperatorEnvelopeEditor: View {
     var body: some View {
         let envelope = openv.envelope
         HStack {
-            EnvelopeEditor(envelope: openv.envelope)
+            EnvelopeEditor(envelope: openv.envelope, levelMin: 0, levelMax: 127)
 
             VStack {
                 Text("L1: \(envelope.L1), T1: \(envelope.T1)")

@@ -133,8 +133,8 @@ extension Operator: LivenEncodable {
     )
 
     func convertToLiven() -> LivenEncodeType {
-        let f = LivenProto.Fixed.init(fixed: mode == .Fixed, frequency: frequency)
-        let r = LivenProto.Ratio.init(ratio: ratio, level: UInt8(level), detune: Int8(detune))
+        let f = LivenProto.Fixed(fixed: mode == .Fixed, frequency: frequency)
+        let r = LivenProto.Ratio(ratio: ratio, level: UInt8(level), detune: Int8(detune))
         let (e, ts, c) = envelope.convertToLiven()
         let s = scale.convertToLiven()
         let v = UInt8(velocity)

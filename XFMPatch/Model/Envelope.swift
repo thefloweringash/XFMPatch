@@ -37,6 +37,14 @@ final class Envelope<T>: ObservableObject where T: FixedWidthInteger {
         self.T3 = t3
         self.T4 = t4
     }
+
+    var levels: LivenProto.PerOp<Int> {
+        (L1, L2, L3, L4)
+    }
+
+    var times: LivenProto.PerOp<Int> {
+        (T1, T2, T3, T4)
+    }
 }
 
 extension Envelope: LivenDecodable {
@@ -53,9 +61,9 @@ extension Envelope: LivenEncodable {
     typealias LivenEncodeType = LivenProto.Envelope<T>
 
     public func convertToLiven() -> LivenEncodeType {
-        return LivenProto.Envelope.init(
-            times: LivenProto.mapPerOp((T1, T2, T3, T4)) { UInt8($0) },
-            levels: LivenProto.mapPerOp((L1, L2, L3, L4)) { T($0) }
+        return .init(
+            times: LivenProto.mapPerOp(times) { UInt8($0) },
+            levels: LivenProto.mapPerOp(levels) { T($0) }
         )
     }
 }
