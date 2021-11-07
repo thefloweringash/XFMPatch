@@ -2,13 +2,19 @@ import SwiftUI
 
 struct OperatorEnvelopeEditor: View {
     @ObservedObject public var openv: OperatorEnvelope
+    @ObservedObject public var envelope: AmpEnvelope
+
+    init(openv: OperatorEnvelope) {
+        self.openv = openv
+        self.envelope = openv.envelope
+    }
 
     var body: some View {
-        let envelope = openv.envelope
         HStack {
             EnvelopeEditor(envelope: openv.envelope, levelMin: 0, levelMax: 127)
 
             VStack {
+                Text("Level: \(openv.level")
                 Text("L1: \(envelope.L1), T1: \(envelope.T1)")
                 Text("L2: \(envelope.L2), T2: \(envelope.T2)")
                 Text("L3: \(envelope.L3), T3: \(envelope.T3)")

@@ -37,6 +37,11 @@ struct OperatorEditor: View {
                 }
                 .disabled(op.mode != .Ratio)
 
+                HStack {
+                    Text("Detune: \(op.detune)")
+                    Text("Velocity Sens: \(op.velocity)")
+                }
+
                 Slider(
                     value: $op.frequency,
                     in: 1...9831

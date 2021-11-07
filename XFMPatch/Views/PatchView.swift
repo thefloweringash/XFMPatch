@@ -20,7 +20,7 @@ struct PatchView: View {
                 }
                 VStack {
                     MatrixView(matrix: patch.matrix)
-                    EnvelopeEditor(envelope: patch.pitchEnvelope, levelMin: -48, levelMax: 48)
+                    PitchEGView(eg: patch.pitchEnvelope)
                 }
             }
         }
