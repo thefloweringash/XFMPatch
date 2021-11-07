@@ -12,17 +12,17 @@ class LivenWriterTests: XCTestCase {
         return LivenReader(withData: writer.get())
     }
 
-    func roundTripUInt<T>(_ x: T) throws -> T where T: UnsignedInteger {
-        try writer.writeUInt(x)
-        return try toReader().readUInt(T.self)
+    func roundTripUInt<T>(_ x: T) throws -> T where T: FixedWidthInteger {
+        try writer.writeInt(x)
+        return try toReader().readInt(T.self)
     }
 
-    func roundTripUInt<T>(_ x: T, size: Int) throws -> T where T: UnsignedInteger {
-        try writer.writeUInt(x, size: size)
-        return try toReader().readUInt(type: T.self, size: size)
+    func roundTripUInt<T>(_ x: T, size: Int) throws -> T where T: FixedWidthInteger {
+        try writer.writeInt(x, size: size)
+        return try toReader().readInt(T.self, size: size)
     }
 
-    func roundTripInt<T>(_ x: T) throws -> T where T: SignedInteger, T.Magnitude: UnsignedInteger {
+    func roundTripInt<T>(_ x: T) throws -> T where T: FixedWidthInteger {
         try writer.writeInt(x)
         return try toReader().readInt(T.self)
     }
@@ -65,24 +65,24 @@ class LivenWriterTests: XCTestCase {
     func testContainerWriterUnbounded() throws {
         let x: UInt32 = 0x12345678;
         try writer.writeContainer(fourCC: "FMNM") { subw in
-            try subw.writeUInt(x)
+            try subw.writeInt(x)
         }
-        let y = try toReader().containerReader(fourCC: "FMNM").readUInt(UInt32.self)
+        let y = try toReader().containerReader(fourCC: "FMNM").readInt(UInt32.self)
         XCTAssertEqual(x, y)
     }
 
     func testContainerWriterPadding() throws {
         try writer.writeContainer(fourCC: "FMNM", size: 24, pad: 0xff) { subw in
-            try subw.writeUInt(UInt8(0x60))
+            try subw.writeInt(UInt8(0x60))
         }
-        let y = try toReader().containerReader(fourCC: "FMNM").readUInt(UInt32.self)
+        let y = try toReader().containerReader(fourCC: "FMNM").readInt(UInt32.self)
         XCTAssertEqual(0xffffff60, y)
     }
 
     func testContainerWriterChecking() throws {
         XCTAssertThrowsError(
             try writer.writeContainer(fourCC: "FMNM", size: 24, pad: nil) { subw in
-                try subw.writeUInt(UInt8(0x60))
+                try subw.writeInt(UInt8(0x60))
             },
             "writeContainer must throw an error if the body does not fill the specified length"
         ) { error in

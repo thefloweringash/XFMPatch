@@ -10,26 +10,12 @@ public class LivenWriter {
 
     private var buffer = Data()
 
-    public func writeUInt<T: UnsignedInteger>(_ val: T) throws -> Void {
-        try writeUInt(val, size: MemoryLayout<T>.size)
+    public func writeInt<T: FixedWidthInteger>(_ val: T) throws -> Void {
+        try writeUInt(T.Magnitude(truncatingIfNeeded: val), size: MemoryLayout<T>.size)
     }
 
-    // Convert a number of bytes
-    public func writeUInt<T: UnsignedInteger>(_ val: T, size: Int) throws {
-        guard size <= MemoryLayout<T>.size else {
-            throw WriterError.IntegerOverflow
-        }
-
-        var x = val
-
-        for _ in 0..<size {
-            buffer.append(UInt8(x & 0xff))
-            x >>= 8
-        }
-    }
-
-    public func writeInt<T: SignedInteger>(_ val: T) throws -> Void where T.Magnitude : UnsignedInteger {
-        try writeUInt(T.Magnitude(truncatingIfNeeded: val))
+    public func writeInt<T: FixedWidthInteger>(_ val: T, size: Int) throws -> Void {
+        try writeUInt(T.Magnitude(truncatingIfNeeded: val), size: size)
     }
 
     public func writeContainer(fourCC: String, body: (LivenWriter) throws -> Void) throws {
@@ -60,8 +46,8 @@ public class LivenWriter {
             }
         }
 
-        try writeUInt(LivenProto.fourCCToNumber(fourCC))
-        try writeUInt(UInt32(totalSize))
+        try writeInt(LivenProto.fourCCToNumber(fourCC))
+        try writeInt(UInt32(totalSize))
         buffer.append(containerData)
     }
 
@@ -69,5 +55,19 @@ public class LivenWriter {
         let result = buffer
         buffer = Data()
         return result
+    }
+
+    // Convert a number of bytes
+    private func writeUInt<T: UnsignedInteger>(_ val: T, size: Int) throws {
+        guard size <= MemoryLayout<T>.size else {
+            throw WriterError.IntegerOverflow
+        }
+
+        var x = val
+
+        for _ in 0..<size {
+            buffer.append(UInt8(x & 0xff))
+            x >>= 8
+        }
     }
 }

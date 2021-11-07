@@ -13,8 +13,8 @@ extension LivenProto {
         }
 
         init(withReader r: LivenReader) throws {
-            fixed = try r.readUInt(UInt8.self) != 0
-            frequencyTimes10 = try r.readUInt(type: UInt32.self, size: 3) // UInt24
+            fixed = try r.readInt(UInt8.self) != 0
+            frequencyTimes10 = try r.readInt(UInt32.self, size: 3) // UInt24
         }
 
         public init(fixed: Bool, frequency: Float) {

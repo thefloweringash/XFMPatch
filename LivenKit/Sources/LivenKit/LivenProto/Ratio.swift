@@ -14,8 +14,8 @@ extension LivenProto {
         }
         
         init(withReader r: LivenReader) throws {
-            ratioTimes100 = try r.readUInt(UInt16.self)
-            level = try r.readUInt(UInt8.self)
+            ratioTimes100 = try r.readInt(UInt16.self)
+            level = try r.readInt(UInt8.self)
             detune = try r.readInt(Int8.self)
         }
 

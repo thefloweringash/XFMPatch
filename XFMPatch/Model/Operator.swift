@@ -29,11 +29,11 @@ final class Operator: ObservableObject {
     @Published public var level: Float
     @Published public var mode: OperatorMode
     @Published public var frequency: Float
-    @Published public var detune: Float
+    @Published public var detune: Int
     @Published public var velocity:Int
     @Published public var pitchEG: Bool
 
-    public let envelope: Envelope
+    public let envelope: OperatorEnvelope
     public let scale: Scale
 
     public convenience init() {
@@ -45,7 +45,7 @@ final class Operator: ObservableObject {
             detune: 0,
             velocity: 0,
             pitchEG: false,
-            envelope: Envelope(),
+            envelope: OperatorEnvelope(),
             scale: Scale()
         )
     }
@@ -55,17 +55,17 @@ final class Operator: ObservableObject {
         level: UInt8,
         fixed: Bool,
         frequency: Float,
-        detune: Float,
+        detune: Int,
         velocity: Int,
         pitchEG: Bool,
-        envelope: Envelope,
+        envelope: OperatorEnvelope,
         scale: Scale
     ) {
         self.ratio = ratio
         self.level = Float(level)
         self.mode = fixed ? .Fixed : .Ratio
         self.frequency = frequency
-        self.detune = detune
+        self.detune = Int(detune)
         self.velocity = velocity
         self.pitchEG = pitchEG
         self.envelope = envelope
@@ -77,7 +77,7 @@ extension Operator: LivenDecodable {
     typealias LivenDecodeType = (
         LivenProto.Fixed,
         LivenProto.Ratio,
-        LivenProto.Envelope,
+        LivenProto.AmpEnvelope,
         LivenProto.Scale,
         UInt8,
         UInt8,
@@ -91,10 +91,11 @@ extension Operator: LivenDecodable {
         level = Float(r.level)
         mode = f.fixed ? .Fixed : .Ratio
         frequency = f.frequency
-        envelope.updateFrom(liven: (e, ts, c))
-        scale.updateFrom(liven: s)
+        detune = Int(r.detune)
         velocity = Int(v)
         pitchEG = p == 1
+        envelope.updateFrom(liven: (e, ts, c))
+        scale.updateFrom(liven: s)
     }
 
     public class func gatherParams(tpdt: LivenProto.TPDT, index: Index) -> LivenDecodeType {
@@ -123,7 +124,7 @@ extension Operator: LivenEncodable {
     typealias LivenEncodeType = (
         LivenProto.Fixed,
         LivenProto.Ratio,
-        LivenProto.Envelope,
+        LivenProto.AmpEnvelope,
         LivenProto.Scale,
         UInt8,
         UInt8,

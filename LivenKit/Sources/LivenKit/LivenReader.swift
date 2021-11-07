@@ -16,35 +16,16 @@ class LivenReader {
         self.buffer = data
     }
 
-    public func readUInt<T: UnsignedInteger>(_ type: T.Type) throws -> T {
-        return try readUInt(type: type, size: MemoryLayout<T>.size)
+    public func readInt<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
+        return T(truncatingIfNeeded: try readUInt(type.Magnitude, size: MemoryLayout<T>.size))
     }
 
-    // Convert a number of bytes
-    public func readUInt<T: UnsignedInteger>(type _: T.Type, size: Int) throws -> T {
-        guard size <= MemoryLayout<T>.size else {
-            throw ReaderError.IntegerOverflow
-        }
-        guard buffer.count >= size else {
-            throw ReaderError.Underflow
-        }
-
-        let shift = (size - 1) << 3
-
-        var result: T = 0
-        for b in buffer.prefix(size) {
-            result = result >> 8 | T(b) << shift
-        }
-        buffer = buffer.advanced(by: size)
-        return result
-    }
-
-    public func readInt<T: SignedInteger>(_ type: T.Type) throws -> T where T.Magnitude : UnsignedInteger {
-        return T(truncatingIfNeeded: try readUInt(type.Magnitude))
+    public func readInt<T: FixedWidthInteger>(_ type: T.Type, size: Int) throws -> T {
+        return T(truncatingIfNeeded: try readUInt(type.Magnitude, size: size))
     }
 
     public func readType() throws -> LivenPacketType {
-        guard let result = LivenPacketType.init(rawValue: try self.readUInt(UInt8.self)) else {
+        guard let result = LivenPacketType.init(rawValue: try self.readInt(UInt8.self)) else {
             throw ReaderError.UnknownPacket
         }
         return result
@@ -74,7 +55,7 @@ class LivenReader {
 
     public func containerReader(fourCC expectedFourCCStr: String) throws -> LivenReader {
         let expectedFourCC = try LivenProto.fourCCToNumber(expectedFourCCStr)
-        let actualFourCC = try readUInt(UInt32.self)
+        let actualFourCC = try readInt(UInt32.self)
 
         guard actualFourCC == expectedFourCC else {
             throw ReaderError.FourCCMismatch(
@@ -83,7 +64,7 @@ class LivenReader {
             )
         }
 
-        let length = Int(try readUInt(UInt32.self) - 8)
+        let length = Int(try readInt(UInt32.self) - 8)
 
         guard buffer.count >= length else {
             throw ReaderError.Underflow
@@ -95,8 +76,8 @@ class LivenReader {
         return LivenReader(withData: subRange)
     }
 
-    public func readPascalString<T: UnsignedInteger>(_ type: T.Type) throws -> String {
-        let length = Int(try readUInt(type))
+    public func readPascalString<T: FixedWidthInteger>(_ type: T.Type) throws -> String {
+        let length = Int(try readInt(type))
         let body = try read(bytes: length)
         guard let result = String(data: body, encoding: .ascii) else {
             throw ReaderError.InvalidString
@@ -108,5 +89,24 @@ class LivenReader {
         if !buffer.isEmpty {
             throw ReaderError.NotEmpty(remaining: buffer.count)
         }
+    }
+
+    // Convert a number of bytes
+    private func readUInt<T: UnsignedInteger>(_: T.Type, size: Int) throws -> T {
+        guard size <= MemoryLayout<T>.size else {
+            throw ReaderError.IntegerOverflow
+        }
+        guard buffer.count >= size else {
+            throw ReaderError.Underflow
+        }
+
+        let shift = (size - 1) << 3
+
+        var result: T = 0
+        for b in buffer.prefix(size) {
+            result = result >> 8 | T(b) << shift
+        }
+        buffer = buffer.advanced(by: size)
+        return result
     }
 }

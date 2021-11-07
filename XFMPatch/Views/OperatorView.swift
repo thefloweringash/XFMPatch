@@ -5,7 +5,7 @@ struct OperatorEditor: View {
 
     var body: some View {
         VStack {
-            EnvelopeEditor(envelope: op.envelope)
+            OperatorEnvelopeEditor(openv: op.envelope)
 
             VStack {
                 Slider(

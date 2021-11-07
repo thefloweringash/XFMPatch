@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "4F35A024-8AC7-4D08-8BC2-B63A96FA16A3",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LivenKitTests",
+        "name" : "LivenKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}

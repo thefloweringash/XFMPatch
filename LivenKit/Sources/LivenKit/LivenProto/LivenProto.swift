@@ -1,4 +1,24 @@
 public struct LivenProto {
+    public typealias PerOp<T> = (T, T, T, T)
+
+    public static func perOp<T>(f: () throws -> T ) rethrows -> PerOp<T> {
+        return (
+            try f(),
+            try f(),
+            try f(),
+            try f()
+        )
+    }
+
+    public static func mapPerOp<T, U>(_ x: PerOp<T>, f: (_: T) -> U) -> PerOp<U> {
+        return (
+            f(x.0),
+            f(x.1),
+            f(x.2),
+            f(x.3)
+        )
+    }
+
     enum ProtoError: Error {
         case InvalidFourCC
     }
@@ -32,15 +52,15 @@ public struct LivenProto {
         public var length: UInt32
 
         init(fromReader reader: LivenReader) throws {
-            unknown = try reader.readUInt(UInt32.self)
-            length = try reader.readUInt(UInt32.self)
+            unknown = try reader.readInt(UInt32.self)
+            length = try reader.readInt(UInt32.self)
         }
     }
 
     struct FooterPacket {
         public var checksum: UInt32
         init(fromReader reader: LivenReader) throws {
-            checksum = try reader.readUInt(UInt32.self)
+            checksum = try reader.readInt(UInt32.self)
         }
     }
 
@@ -53,8 +73,8 @@ public struct LivenProto {
         init(withReader outerReader: LivenReader) throws {
             let r = try outerReader.containerReader(fourCC: "FMTC")
 
-            boop1 = try r.readUInt(UInt32.self)
-            boop2 = try r.readUInt(UInt32.self)
+            boop1 = try r.readInt(UInt32.self)
+            boop2 = try r.readInt(UInt32.self)
             fmnm = try FMNM(withReader: r)
             tpdt = try TPDT(withReader: r)
         }

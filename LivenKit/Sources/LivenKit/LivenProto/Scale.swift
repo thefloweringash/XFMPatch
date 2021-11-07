@@ -82,9 +82,9 @@ extension LivenProto {
         init(withReader r: LivenReader) throws {
             lGain = try r.readInt(Int8.self)
             rGain = try r.readInt(Int8.self)
-            curvesPacked = try r.readUInt(UInt8.self)
+            curvesPacked = try r.readInt(UInt8.self)
 
-            guard let parsedScalepos = ScalePos(rawValue: try r.readUInt(UInt8.self)) else {
+            guard let parsedScalepos = ScalePos(rawValue: try r.readInt(UInt8.self)) else {
                 throw ScaleError.InvalidScalePos
             }
             scalePos = parsedScalepos

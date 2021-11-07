@@ -4,78 +4,46 @@ extension LivenProto {
         public var boop2: UInt32 = 1
         public var boop3: UInt32 = 0
 
-        public var fixed: (Fixed, Fixed, Fixed, Fixed)
-        public var ratio: (Ratio, Ratio, Ratio, Ratio)
-        public var envelope: (Envelope, Envelope, Envelope, Envelope)
+        public var fixed: PerOp<Fixed>
+        public var ratio: PerOp<Ratio>
+        public var envelope: PerOp<AmpEnvelope>
+        public var pitchEnvelope: PitchEnvelope
 
-        public var boop4: UInt32 = 0
-        public var boop5: UInt32 = 0
-
-        public var scale: (Scale, Scale, Scale, Scale)
+        public var scale: PerOp<Scale>
 
         public var matrix: Matrix
 
-        public var velocity: (UInt8, UInt8, UInt8, UInt8)
-        public var timescale: (UInt8, UInt8, UInt8, UInt8)
-        public var pitchEG: (UInt8, UInt8, UInt8, UInt8)
+        public var velocity: PerOp<UInt8>
+        public var timescale: PerOp<UInt8>
+        public var pitchEG: PerOp<UInt8>
 
-        public var curve: (Curve, Curve, Curve, Curve)
+        public var curve: PerOp<Curve>
 
         public var boop6: UInt32 = 0xffffff00
 
         init(withReader outerReader: LivenReader) throws {
             let r = try outerReader.containerReader(fourCC: "TPDT")
 
-            boop1 = try r.readUInt(UInt32.self)
-            boop2 = try r.readUInt(UInt32.self)
-            boop3 = try r.readUInt(UInt32.self)
+            boop1 = try r.readInt(UInt32.self)
+            boop2 = try r.readInt(UInt32.self)
+            boop3 = try r.readInt(UInt32.self)
 
-            fixed.0 = try Fixed(withReader: r)
-            fixed.1 = try Fixed(withReader: r)
-            fixed.2 = try Fixed(withReader: r)
-            fixed.3 = try Fixed(withReader: r)
+            fixed = try perOp { try Fixed(withReader: r) }
+            ratio = try perOp { try Ratio(withReader: r) }
+            envelope = try perOp { try Envelope(withReader: r) }
 
-            ratio.0 = try Ratio(withReader: r)
-            ratio.1 = try Ratio(withReader: r)
-            ratio.2 = try Ratio(withReader: r)
-            ratio.3 = try Ratio(withReader: r)
+            pitchEnvelope = try Envelope(withReader: r)
 
-            envelope.0 = try Envelope(withReader: r)
-            envelope.1 = try Envelope(withReader: r)
-            envelope.2 = try Envelope(withReader: r)
-            envelope.3 = try Envelope(withReader: r)
-
-            boop4 = try r.readUInt(UInt32.self)
-            boop5 = try r.readUInt(UInt32.self)
-
-            scale.0 = try Scale(withReader: r)
-            scale.1 = try Scale(withReader: r)
-            scale.2 = try Scale(withReader: r)
-            scale.3 = try Scale(withReader: r)
+            scale = try perOp { try Scale(withReader: r) }
 
             matrix = try Matrix(withReader: r)
 
-            velocity.0 = try r.readUInt(UInt8.self)
-            velocity.1 = try r.readUInt(UInt8.self)
-            velocity.2 = try r.readUInt(UInt8.self)
-            velocity.3 = try r.readUInt(UInt8.self)
+            velocity = try perOp { try r.readInt(UInt8.self) }
+            timescale = try perOp { try r.readInt(UInt8.self) }
+            pitchEG = try perOp { try r.readInt(UInt8.self) }
+            curve = try perOp { try Curve(withReader: r) }
 
-            timescale.0 = try r.readUInt(UInt8.self)
-            timescale.1 = try r.readUInt(UInt8.self)
-            timescale.2 = try r.readUInt(UInt8.self)
-            timescale.3 = try r.readUInt(UInt8.self)
-
-            pitchEG.0 = try r.readUInt(UInt8.self)
-            pitchEG.1 = try r.readUInt(UInt8.self)
-            pitchEG.2 = try r.readUInt(UInt8.self)
-            pitchEG.3 = try r.readUInt(UInt8.self)
-
-            curve.0 = try Curve(withReader: r)
-            curve.1 = try Curve(withReader: r)
-            curve.2 = try Curve(withReader: r)
-            curve.3 = try Curve(withReader: r)
-
-            boop6 = try r.readUInt(UInt32.self)
+            boop6 = try r.readInt(UInt32.self)
 
             try r.assertDrained()
         }
@@ -83,7 +51,8 @@ extension LivenProto {
         public init(
             fixed: (Fixed, Fixed, Fixed, Fixed),
             ratio: (Ratio, Ratio, Ratio, Ratio),
-            envelope: (Envelope, Envelope, Envelope, Envelope),
+            envelope: (AmpEnvelope, AmpEnvelope, AmpEnvelope, AmpEnvelope),
+            pitchEnvelope: PitchEnvelope,
             scale: (Scale, Scale, Scale, Scale),
             matrix: Matrix,
             velocity: (UInt8, UInt8, UInt8, UInt8),
@@ -94,6 +63,7 @@ extension LivenProto {
             self.fixed = fixed
             self.ratio = ratio
             self.envelope = envelope
+            self.pitchEnvelope = pitchEnvelope
             self.scale = scale
             self.matrix = matrix
             self.velocity = velocity

@@ -1,0 +1,22 @@
+extension LivenProto {
+    public class Envelope<T> where T: FixedWidthInteger {
+        public var times: PerOp<UInt8>
+        public var levels: PerOp<T>
+
+        init(withReader r: LivenReader) throws {
+            times = try perOp { try r.readInt(UInt8.self) }
+            levels = try perOp { try r.readInt(T.self) }
+        }
+
+        public init(
+            times: PerOp<UInt8>,
+            levels: PerOp<T>
+        ) {
+            self.times = times
+            self.levels = levels
+        }
+    }
+
+    public typealias PitchEnvelope = Envelope<Int8>
+    public typealias AmpEnvelope = Envelope<UInt8>
+}

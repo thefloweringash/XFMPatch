@@ -6,23 +6,27 @@ final class Patch: ObservableObject {
 
     public let operators: (Operator, Operator, Operator, Operator)
     public let matrix: Matrix
+    public let pitchEnvelope: PitchEnvelope
 
     public convenience init() {
         self.init(
             name: "INIT",
             operators: (Operator(), Operator(), Operator(), Operator()),
-            matrix: Matrix()
+            matrix: Matrix(),
+            pitchEnvelope: PitchEnvelope()
         )
     }
 
     public init(
         name: String,
         operators: (Operator, Operator, Operator, Operator),
-        matrix: Matrix
+        matrix: Matrix,
+        pitchEnvelope: PitchEnvelope
     ) {
         self.name = name
         self.operators = operators
         self.matrix = matrix
+        self.pitchEnvelope = pitchEnvelope
     }
 }
 
@@ -57,6 +61,7 @@ extension Patch: LivenEncodable {
             fixed: (o1f, o2f, o3f, o4f),
             ratio: (o1r, o2r, o3r, o4r),
             envelope: (o1e, o2e, o3e, o4e),
+            pitchEnvelope: pitchEnvelope.convertToLiven(),
             scale: (o1s, o2s, o3s, o4s),
             matrix: matrix.convertToLiven(),
             velocity: (o1v, o2v, o3v, o4v),

@@ -45,11 +45,11 @@ struct EnvelopeShape: Shape {
 }
 
 class EnvelopeGeometry {
-    public let envelope: Envelope
+    public let envelope: AmpEnvelope
     public let boundingRect: CGRect
     private let timeTotal: CGFloat
 
-    init(envelope: Envelope, boundingRect: CGRect) {
+    init(envelope: AmpEnvelope, boundingRect: CGRect) {
         self.envelope = envelope
         self.boundingRect = boundingRect
         self.timeTotal =
@@ -145,7 +145,7 @@ struct Handle: View {
 }
 
 struct EnvelopeEditor: View {
-    @ObservedObject public var envelope: Envelope
+    @ObservedObject public var envelope: AmpEnvelope
 
     var body: some View {
         HStack {
@@ -164,15 +164,6 @@ struct EnvelopeEditor: View {
                     Handle(level: $envelope.L4, offset: geometry.p4.x, geometry: geometry)
                 }
             }.frame(width: 400, height: 300)
-
-            
-
-            VStack {
-                Text("L1: \(envelope.L1), T1: \(envelope.T1)")
-                Text("L2: \(envelope.L2), T2: \(envelope.T2)")
-                Text("L3: \(envelope.L3), T3: \(envelope.T3)")
-                Text("L4: \(envelope.L4), T4: \(envelope.T4)")
-            }.frame(width: 100, height: 100)
         }
     }
 }

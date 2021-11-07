@@ -28,6 +28,10 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
+         <TestPlanReference
+            reference = "container:LivenKit/Tests/LivenKitTests/XFMPatch copy.xctestplan"
+            default = "YES">
+         </TestPlanReference>
       </TestPlans>
       <Testables>
          <TestableReference
