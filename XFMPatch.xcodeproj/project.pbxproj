@@ -18,6 +18,8 @@
 		4802E43D272E4A7A00E11B33 /* Envelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4802E43C272E4A7A00E11B33 /* Envelope.swift */; };
 		4802E43F272E4A8800E11B33 /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4802E43E272E4A8800E11B33 /* Operator.swift */; };
 		4802E441272E4AB700E11B33 /* Patch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4802E440272E4AB700E11B33 /* Patch.swift */; };
+		4833A78627395DCD00C16493 /* SegmentedDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4833A78527395DCD00C16493 /* SegmentedDisplay.swift */; };
+		4833A78827397AAB00C16493 /* SegmentedFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4833A78727397AAB00C16493 /* SegmentedFont.swift */; };
 		486AB7D9273414D700A21610 /* MIDIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486AB7D8273414D700A21610 /* MIDIProvider.swift */; };
 		486AB7DF273641CA00A21610 /* PatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486AB7DE273641CA00A21610 /* PatchView.swift */; };
 		486AB7E12736420400A21610 /* OperatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486AB7E02736420400A21610 /* OperatorView.swift */; };
@@ -69,6 +71,8 @@
 		4802E43C272E4A7A00E11B33 /* Envelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Envelope.swift; sourceTree = "<group>"; };
 		4802E43E272E4A8800E11B33 /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
 		4802E440272E4AB700E11B33 /* Patch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Patch.swift; sourceTree = "<group>"; };
+		4833A78527395DCD00C16493 /* SegmentedDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedDisplay.swift; sourceTree = "<group>"; };
+		4833A78727397AAB00C16493 /* SegmentedFont.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedFont.swift; sourceTree = "<group>"; };
 		486AB7D8273414D700A21610 /* MIDIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDIProvider.swift; sourceTree = "<group>"; };
 		486AB7DE273641CA00A21610 /* PatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchView.swift; sourceTree = "<group>"; };
 		486AB7E02736420400A21610 /* OperatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatorView.swift; sourceTree = "<group>"; };
@@ -138,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				48D0BEA027368D51003EE84A /* LivenKit */,
+				4833A78427395D9A00C16493 /* Widgets */,
 				486AB7D7273414C900A21610 /* Services */,
 				4802E442272E4D5E00E11B33 /* Views */,
 				4802E43B272E472D00E11B33 /* Model */,
@@ -204,6 +209,15 @@
 				48D0BEA42736B6AE003EE84A /* MatrixView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		4833A78427395D9A00C16493 /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				4833A78727397AAB00C16493 /* SegmentedFont.swift */,
+				4833A78527395DCD00C16493 /* SegmentedDisplay.swift */,
+			);
+			path = Widgets;
 			sourceTree = "<group>";
 		};
 		486AB7D7273414C900A21610 /* Services */ = {
@@ -370,8 +384,10 @@
 				486AB7E12736420400A21610 /* OperatorView.swift in Sources */,
 				4802E43D272E4A7A00E11B33 /* Envelope.swift in Sources */,
 				48D0BEAB2737706C003EE84A /* OperatorEnvelope.swift in Sources */,
+				4833A78827397AAB00C16493 /* SegmentedFont.swift in Sources */,
 				48D0BEA72736B6C6003EE84A /* Matrix.swift in Sources */,
 				48D0BEA52736B6AE003EE84A /* MatrixView.swift in Sources */,
+				4833A78627395DCD00C16493 /* SegmentedDisplay.swift in Sources */,
 				486AB7EB27364DD800A21610 /* ScaleView.swift in Sources */,
 				48AE1A402737D2A400E6BF3C /* Bank.swift in Sources */,
 				486AB7D9273414D700A21610 /* MIDIProvider.swift in Sources */,
