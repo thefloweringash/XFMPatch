@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class Scale {
+    public struct Scale {
         enum ScaleError: Error {
             case InvalidCurves
             case InvalidScalePos

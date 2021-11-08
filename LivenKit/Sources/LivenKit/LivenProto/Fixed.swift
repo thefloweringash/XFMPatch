@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class Fixed {
+    public struct Fixed {
         public var fixed: Bool
         public var frequencyTimes10: UInt32
 

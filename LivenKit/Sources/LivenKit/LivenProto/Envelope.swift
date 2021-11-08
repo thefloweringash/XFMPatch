@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class Envelope<T> where T: FixedWidthInteger {
+    public struct Envelope<T> where T: FixedWidthInteger {
         public var times: PerOp<UInt8>
         public var levels: PerOp<T>
 

@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class Ratio {
+    public struct Ratio {
         public var ratioTimes100: UInt16
         public var level: UInt8
         public var detune: Int8

@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class BKDT {
+    public struct BKDT {
         public var boop1: UInt32 = 0
         public var boop2: UInt32 = 2
 

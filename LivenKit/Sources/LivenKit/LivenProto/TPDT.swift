@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class TPDT {
+    public struct TPDT {
         public var boop1: UInt32 = 0
         public var boop2: UInt32 = 1
         public var boop3: UInt32 = 0

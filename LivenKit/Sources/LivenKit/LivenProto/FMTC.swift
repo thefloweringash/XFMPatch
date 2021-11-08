@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class FMTC {
+    public struct FMTC {
         public var boop1: UInt32 = 0
         public var boop2: UInt32 = 2
         public var fmnm: FMNM

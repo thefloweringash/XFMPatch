@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class Curve {
+    public struct Curve {
         public var up: Int8
         public var down: Int8
 

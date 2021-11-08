@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class FMNM {
+    public struct FMNM {
         public var boop1: UInt32 = 0
         public var name: String
 

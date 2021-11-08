@@ -1,5 +1,5 @@
 extension LivenProto {
-    public class Matrix {
+    public struct Matrix {
         public typealias OperatorLevels = (
             (Int8, UInt8, UInt8, UInt8),
             (UInt8, Int8, UInt8, UInt8),
