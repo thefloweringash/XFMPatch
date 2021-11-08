@@ -5,7 +5,7 @@ struct PatchView: View {
 
     var body: some View {
         VStack {
-            Text(patch.name)
+            SegmentedString(size: .Small, string: patch.name)
 
             HStack {
                 VStack {
