@@ -199,7 +199,20 @@ struct SegmentedString: View {
     }
 }
 
-class SegsPreview: PreviewProvider {
+class HugeSegsPreview: PreviewProvider {
+    static var previews: some View {
+        VStack {
+            SegmentedString(size: .Huge, string: "ABCDEFG")
+            SegmentedString(size: .Huge, string: "HIJKLMN")
+            SegmentedString(size: .Huge, string: "OPQRSTU")
+            SegmentedString(size: .Huge, string: "VWXYZ  ")
+            SegmentedString(size: .Huge, string: "1234567")
+            SegmentedString(size: .Huge, string: "890   a")
+        }
+    }
+}
+
+class SmallSegsPreview: PreviewProvider {
     static var previews: some View {
         VStack {
             SegmentedString(size: .Small, string: "ABCDEFG")
@@ -207,9 +220,7 @@ class SegsPreview: PreviewProvider {
             SegmentedString(size: .Small, string: "OPQRSTU")
             SegmentedString(size: .Small, string: "VWXYZ  ")
             SegmentedString(size: .Small, string: "1234567")
-            SegmentedString(size: .Small, string: "890    ")
-//            SegmentedString(string: "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.")
-//            SegmentedString(string: "the quick brown fox jumps over the lazy dog.")
+            SegmentedString(size: .Small, string: "890   a")
         }
     }
 }
