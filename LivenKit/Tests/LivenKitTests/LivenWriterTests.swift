@@ -62,6 +62,13 @@ class LivenWriterTests: XCTestCase {
         }
     }
 
+    func testRoundtripPascalString() throws {
+        let testString = "Hello, world"
+        try writer.writePascalString(UInt32.self, testString)
+        let read = try toReader().readPascalString(UInt32.self)
+        XCTAssertEqual(testString, read)
+    }
+
     func testContainerWriterUnbounded() throws {
         let x: UInt32 = 0x12345678;
         try writer.writeContainer(fourCC: "FMNM") { subw in

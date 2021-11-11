@@ -5,6 +5,7 @@ public class LivenWriter {
         case IntegerOverflow
         case ContainerOverflow(expected: Int, actual: Int)
         case ContainerUnderflow(expected: Int, actual: Int)
+        case NonAsciiString
     }
 
     private var buffer = Data()
@@ -48,6 +49,22 @@ public class LivenWriter {
         try writeInt(LivenProto.fourCCToNumber(fourCC))
         try writeInt(UInt32(totalSize))
         buffer.append(containerData)
+    }
+
+    public func writePascalString<T: FixedWidthInteger>(_ type: T.Type, _ string: String) throws -> Void {
+        guard let stringAsAscii = string.data(using: .ascii) else {
+            throw WriterError.NonAsciiString
+        }
+        try writeInt(T(stringAsAscii.count))
+        buffer.append(stringAsAscii)
+    }
+
+    public func writeData(_ data: Data) {
+        buffer.append(data)
+    }
+
+    public func writeBytes<T: Collection>(_ bytes: T) where T.Element == UInt8 {
+        buffer.append(contentsOf: bytes)
     }
 
     public func get() -> Data {

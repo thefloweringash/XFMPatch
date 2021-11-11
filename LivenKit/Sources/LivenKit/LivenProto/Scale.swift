@@ -1,5 +1,5 @@
 extension LivenProto {
-    public struct Scale {
+    public struct Scale: LivenWritable {
         enum ScaleError: Error {
             case InvalidCurves
             case InvalidScalePos
@@ -92,6 +92,13 @@ extension LivenProto {
             guard tryLCurve != nil && tryRCurve != nil else {
                 throw ScaleError.InvalidCurves
             }
+        }
+
+        public func write(toWriter w: LivenWriter) throws {
+            try w.writeInt(lGain)
+            try w.writeInt(rGain)
+            try w.writeInt(curvesPacked)
+            try w.writeInt(scalePos.rawValue)
         }
 
         private var tryLCurve: CurveType? {

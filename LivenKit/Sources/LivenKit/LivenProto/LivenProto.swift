@@ -19,6 +19,13 @@ public struct LivenProto {
         )
     }
 
+    public static func forEachOp<T>(_ x: PerOp<T>, f: (_: T) throws -> Void) rethrows {
+        try f(x.0)
+        try f(x.1)
+        try f(x.2)
+        try f(x.3)
+    }
+
     enum ProtoError: Error {
         case InvalidFourCC
     }
@@ -47,20 +54,39 @@ public struct LivenProto {
     }
 
 
-    struct HeaderPacket {
+    public struct HeaderPacket: LivenCodable {
         public var unknown: UInt32
         public var length: UInt32
 
-        init(fromReader reader: LivenReader) throws {
+        public init(withReader reader: LivenReader) throws {
             unknown = try reader.readInt(UInt32.self)
             length = try reader.readInt(UInt32.self)
         }
+
+        public func write(toWriter writer: LivenWriter) throws {
+            try writer.writeInt(unknown)
+            try writer.writeInt(length)
+        }
+
+        init(unknown: UInt32, length: UInt32) {
+            self.unknown = unknown
+            self.length = length
+        }
     }
 
-    struct FooterPacket {
+    public struct FooterPacket: LivenCodable {
         public var checksum: UInt32
-        init(fromReader reader: LivenReader) throws {
+
+        public init(withReader reader: LivenReader) throws {
             checksum = try reader.readInt(UInt32.self)
+        }
+
+        public func write(toWriter writer: LivenWriter) throws {
+            try writer.writeInt(checksum)
+        }
+
+        init(checksum: UInt32) {
+            self.checksum = checksum
         }
     }
 }

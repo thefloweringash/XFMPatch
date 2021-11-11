@@ -36,6 +36,30 @@ extension LivenProto {
             mixerLevels = try perOp { try r.readInt(UInt8.self) }
         }
 
+        public func write(toWriter w: LivenWriter) throws {
+            try w.writeInt(operatorLevels.0.0)
+            try w.writeInt(operatorLevels.0.1)
+            try w.writeInt(operatorLevels.0.2)
+            try w.writeInt(operatorLevels.0.3)
+
+            try w.writeInt(operatorLevels.1.0)
+            try w.writeInt(operatorLevels.1.1)
+            try w.writeInt(operatorLevels.1.2)
+            try w.writeInt(operatorLevels.1.3)
+
+            try w.writeInt(operatorLevels.2.0)
+            try w.writeInt(operatorLevels.2.1)
+            try w.writeInt(operatorLevels.2.2)
+            try w.writeInt(operatorLevels.2.3)
+
+            try w.writeInt(operatorLevels.3.0)
+            try w.writeInt(operatorLevels.3.1)
+            try w.writeInt(operatorLevels.3.2)
+            try w.writeInt(operatorLevels.3.3)
+
+            try forEachOp(mixerLevels) { try w.writeInt($0) }
+        }
+
         public init(
             operatorLevels: OperatorLevels,
             mixerLevels: MixerLevels

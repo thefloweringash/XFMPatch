@@ -1,5 +1,7 @@
 extension LivenProto {
-    public struct TPDT {
+    public struct TPDT: LivenWritable {
+        static let containerName = "TPDT"
+
         public var boop1: UInt32 = 0
         public var boop2: UInt32 = 1
         public var boop3: UInt32 = 0
@@ -22,7 +24,7 @@ extension LivenProto {
         public var boop6: UInt32 = 0 // TODO: first byte is pattern level
 
         init(withReader outerReader: LivenReader) throws {
-            let r = try outerReader.containerReader(fourCC: "TPDT")
+            let r = try outerReader.containerReader(fourCC: Self.containerName)
 
             boop1 = try r.readInt(UInt32.self)
             boop2 = try r.readInt(UInt32.self)
@@ -46,6 +48,31 @@ extension LivenProto {
             boop6 = try r.readInt(UInt32.self)
 
             try r.assertDrained()
+        }
+
+        public func write(toWriter outer: LivenWriter) throws {
+            try outer.writeContainer(fourCC: Self.containerName, size: 152, pad: nil) { w in
+                try w.writeInt(boop1)
+                try w.writeInt(boop2)
+                try w.writeInt(boop3)
+
+                try forEachOp(fixed) { try $0.write(toWriter: w) }
+                try forEachOp(ratio) { try $0.write(toWriter: w) }
+                try forEachOp(envelope) { try $0.write(toWriter: w) }
+
+                try pitchEnvelope.write(toWriter: w)
+
+                try forEachOp(scale) { try $0.write(toWriter: w) }
+
+                try matrix.write(toWriter: w)
+
+                try forEachOp(velocity) { try w.writeInt($0) }
+                try forEachOp(timescale) { try w.writeInt($0) }
+                try forEachOp(pitchEG) { try w.writeInt($0) }
+                try forEachOp(curve) { try $0.write(toWriter: w) }
+
+                try w.writeInt(boop6)
+            }
         }
 
         public init(

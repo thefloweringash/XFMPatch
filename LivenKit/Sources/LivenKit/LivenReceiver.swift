@@ -1,66 +1,5 @@
 import Foundation
 import Combine
-import zlib
-
-enum LivenPacketType: UInt8 {
-    case Header = 0x1
-    case Body = 0x2
-    case Footer = 0x3
-}
-
-public enum AnyLivenStruct {
-    case Name(_: LivenProto.FMNM)
-    case BankContainer(_: LivenProto.FMBC)
-    case TemplateContainer(_: LivenProto.FMTC)
-    case BankData(_: LivenProto.BKDT)
-    case TemplateData(_: LivenProto.TPDT)
-}
-
-public enum LivenStructType: String {
-    case Name = "FMNM"
-    case BankContainer = "FMBC"
-    case TemplateContainer = "FMTC"
-    case BankData = "BKDT"
-    case TemplateData = "TPDT"
-
-    var fourCC: UInt32 {
-        try! LivenProto.fourCCToNumber(rawValue)
-    }
-
-    var crcXorIn: UInt32? {
-        switch self {
-        case .TemplateContainer: return 0x6046f7ed
-        case .BankContainer: return 0xfb01478d
-        default:
-            return nil
-        }
-    }
-
-    var initVal: UInt32? {
-        guard let crcXorIn = self.crcXorIn else { return nil }
-        return ~crcXorIn
-    }
-
-    static func fromFourCC(_ fourCC: UInt32) -> Self? {
-        LivenStructType(rawValue: LivenProto.fourCCToString(fourCC))
-    }
-
-    func decode(withData buf: Data) throws -> AnyLivenStruct {
-        let r = LivenReader(withData: buf)
-        switch self {
-        case .Name:
-            return .Name(try LivenProto.FMNM(withReader: r))
-        case .BankContainer:
-            return .BankContainer(try LivenProto.FMBC(withReader: r))
-        case .TemplateContainer:
-            return .TemplateContainer(try LivenProto.FMTC(withReader: r))
-        case .BankData:
-            return .BankData(try LivenProto.BKDT(withReader: r))
-        case .TemplateData:
-            return .TemplateData(try LivenProto.TPDT(withReader: r))
-        }
-    }
-}
 
 public class LivenReceiver {
     enum State {
@@ -74,7 +13,7 @@ public class LivenReceiver {
         case ChecksumMismatch(expected: UInt32, actual: UInt32)
         case UnknownContainer(type: String)
         case UnexpectedContainer(type: LivenStructType)
-
+        case HeaderMismatch(expected: Data, actual: Data)
     }
 
     public var inboundTransfers = PassthroughSubject<AnyLivenStruct, Never>()
@@ -92,17 +31,17 @@ public class LivenReceiver {
     public func onBytes<T: Collection>(_ bytes: T) where T.Element == UInt8, T.Index == Int {
         // print("onBytes(\(self.hex(bytes))")
 
-        var base: T.SubSequence = bytes.suffix(from:0)
-        while base.count != 0 {
+        var base: T.SubSequence = bytes.suffix(from: 0)
+        while !base.isEmpty {
             if (!inMessage) {
                 // Must be an 0xF0 to trigger anything
-                guard bytes.first == 0xF0 else { return }
+                guard base.first == 0xF0 else { return }
                 inMessage = true
                 buffer = Data()
             }
 
-            if let endOfMessage = bytes.firstIndex(of: 0xF7) {
-                buffer.append(contentsOf: bytes.prefix(through: endOfMessage))
+            if let endOfMessage = base.firstIndex(of: 0xF7) {
+                buffer.append(contentsOf: base.prefix(through: endOfMessage))
 
                 self.onUnpackedPacket(buffer)
 
@@ -110,22 +49,20 @@ public class LivenReceiver {
                 inMessage = false
                 base = base.suffix(from: endOfMessage + 1)
             } else {
-                buffer.append(contentsOf: bytes)
+                buffer.append(contentsOf: base)
                 return
             }
         }
     }
 
-    private func onUnpackedPacket<T: Collection>(_ bytes: T) where T.Element == UInt8 {
-        // print("onUnpackedPacket(\(self.hex(bytes))")
-
-        var base = bytes.dropFirst().prefix { $0 != 0xf7 }
-
+    internal func combineHighBits<T: Collection>(_ data: T) -> Data where T.Element == UInt8 {
         var buf = Data.init()
 
-        while true {
+        var base = data.dropFirst(0)
+
+        while !base.isEmpty {
             let chunk = base.prefix(8)
-            guard var highBits = chunk.first else { break }
+            guard var highBits: UInt8 = chunk.first else { break }
 
             highBits <<= 1
 
@@ -140,7 +77,14 @@ public class LivenReceiver {
             base = base.dropFirst(8)
         }
 
-        self.onPacket(buf)
+        return buf
+    }
+
+    private func onUnpackedPacket<T: Collection>(_ bytes: T) where T.Element == UInt8 {
+        // print("onUnpackedPacket(\(self.hex(bytes))")
+
+        let base = bytes.dropFirst().prefix { $0 != 0xf7 }
+        self.onPacket(combineHighBits(base))
     }
 
     // MARK: - Reading Packets
@@ -155,11 +99,14 @@ public class LivenReceiver {
             let reader = LivenReader(withData: packet)
 
             // Constant header
-            try reader.skip(bytes: 6)
+            let header = try reader.read(bytes: 6)
+            guard header == LivenPacketHeader else {
+                throw ReceiverError.HeaderMismatch(expected: LivenPacketHeader, actual: header)
+            }
 
             switch try reader.readType() {
             case .Header:
-                self.header = try LivenProto.HeaderPacket.init(fromReader: reader)
+                self.header = try LivenProto.HeaderPacket.init(withReader: reader)
                 self.body = Data()
             case .Body:
                 guard self.header != nil else {
@@ -170,7 +117,7 @@ public class LivenReceiver {
                 guard let header = self.header else {
                     throw ReceiverError.UnmatchedFooter
                 }
-                let footer = try LivenProto.FooterPacket(fromReader: reader)
+                let footer = try LivenProto.FooterPacket(withReader: reader)
 
                 self.onTransfer(header: header, body: self.body, footer: footer)
             }
@@ -192,6 +139,8 @@ public class LivenReceiver {
             unknown: \(header.unknown)
           Checksum: \(footer.checksum)
         """
+
+        print(description)
 
         try description.write(
             to: dir.appendingPathComponent("summary.txt"),
@@ -236,10 +185,9 @@ public class LivenReceiver {
                 throw ReceiverError.UnexpectedContainer(type: container)
             }
 
-            let checksum = self.checksum(initVal: initVal, buf: body)
+            let checksum = checksum(initVal: initVal, buf: body)
             if footer.checksum != checksum {
-                print("Warning: checksum failure")
-                // throw ReceiverError.ChecksumMismatch(expected: footer.checksum, actual: checksum)
+                throw ReceiverError.ChecksumMismatch(expected: footer.checksum, actual: checksum)
             }
 
             inboundTransfers.send(try container.decode(withData: body))
@@ -248,11 +196,4 @@ public class LivenReceiver {
         }
     }
 
-    private func checksum(initVal: UInt32, buf: Data) -> UInt32 {
-        return buf.withUnsafeBytes { (p: UnsafePointer<Bytef>) -> UInt32 in
-            // This may seem like a magic constant, but it's more likely a constant prefix
-            // that I have yet determine.
-            return UInt32(crc32(uLong(initVal), p, UInt32(buf.count)))
-        }
-    }
 }

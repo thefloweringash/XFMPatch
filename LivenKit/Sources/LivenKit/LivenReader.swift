@@ -1,6 +1,6 @@
 import Foundation
 
-class LivenReader {
+public class LivenReader {
     enum ReaderError: Error {
         case Underflow
         case UnknownPacket
