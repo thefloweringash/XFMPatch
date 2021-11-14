@@ -7,20 +7,18 @@ struct PatchView: View {
         VStack {
             SegmentedString(size: .Small, string: patch.name)
 
-            HStack {
-                VStack {
-                    HStack {
-                        OperatorEditor(op: patch.operators.0)
-                        OperatorEditor(op: patch.operators.1)
+            HStack(alignment: .top) {
+                SectionView("Operator 1") { OperatorEditor(op: patch.operators.0) }
+                SectionView("Operator 2") { OperatorEditor(op: patch.operators.1) }
+                SectionView("Operator 3") { OperatorEditor(op: patch.operators.2) }
+                SectionView("Operator 4") { OperatorEditor(op: patch.operators.3) }
+                VStack(alignment: .leading) {
+                    SectionView("Matrix") {
+                        MatrixView(matrix: patch.matrix)
                     }
-                    HStack {
-                        OperatorEditor(op: patch.operators.2)
-                        OperatorEditor(op: patch.operators.3)
+                    SectionView("Pitch Envelope") {
+                        PitchEGView(eg: patch.pitchEnvelope)
                     }
-                }
-                VStack {
-                    MatrixView(matrix: patch.matrix)
-                    PitchEGView(eg: patch.pitchEnvelope)
                 }
             }
         }

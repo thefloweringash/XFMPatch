@@ -8,8 +8,8 @@ final class Scale: ObservableObject {
     @Published public var lCurve: CurveType
     @Published public var rCurve: CurveType
     @Published public var scalePos: ScalePos
-    @Published public var lGain: Float
-    @Published public var rGain: Float
+    @Published public var lGain: Int8
+    @Published public var rGain: Int8
 
     public init() {
         lCurve = .Linear
@@ -27,16 +27,16 @@ extension Scale: LivenDecodable {
         lCurve = s.lCurve
         rCurve = s.rCurve
         scalePos = s.scalePos
-        lGain = Float(s.lGain)
-        rGain = Float(s.rGain)
+        lGain = s.lGain
+        rGain = s.rGain
     }
 }
 
 extension Scale: LivenEncodable {
     func convertToLiven() -> LivenProto.Scale {
         return .init(
-            lGain: Int8(self.lGain),
-            rGain: Int8(self.rGain),
+            lGain: self.lGain,
+            rGain: self.rGain,
             lCurve: self.lCurve,
             rCurve: self.rCurve,
             scalePos: self.scalePos

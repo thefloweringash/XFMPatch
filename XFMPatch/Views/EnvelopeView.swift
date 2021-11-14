@@ -4,10 +4,7 @@ struct GridBackground: View {
     var envelopeGeometry: EnvelopeGeometry
 
     var body: some View {
-        Rectangle()
-            .stroke()
-
-        KeyArea(envelopeGeometry: envelopeGeometry).fill(.ultraThinMaterial)
+        KeyArea(envelopeGeometry: envelopeGeometry).fill(Color("EnvelopeKeyArea"))
     }
 }
 
@@ -91,7 +88,7 @@ class EnvelopeGeometry {
     public var start: CGPoint {
         .init(
             x: boundingRect.origin.x,
-            y: levelToY(l.3)
+            y: levelToY(0)
         )
     }
 
@@ -151,7 +148,7 @@ struct Handle: View {
     public let geometry: EnvelopeGeometry
 
     var body: some View {
-        let changeLevel = DragGesture()
+        let changeLevel = DragGesture(minimumDistance: 0)
             .onChanged { (state) in
                 level = geometry.yToLevel(state.location.y)
             }
@@ -161,17 +158,13 @@ struct Handle: View {
 
         ZStack {
             Circle()
-                .fill(Color.red)
-                .frame(width: 32, height: 32)
-                .position(.init(x: offset, y: geometry.levelToY(level)))
-                .gesture(changeLevel)
-
-            Circle()
                 .fill(Color.blue)
                 .frame(width: 5, height: 5)
-                .position(.init(x: offset, y: geometry.levelToY(level)))
         }
-
+        .frame(width: 32, height: 32)
+        .contentShape(Circle())
+        .position(.init(x: offset, y: geometry.levelToY(level)))
+        .gesture(changeLevel)
     }
 }
 
@@ -182,7 +175,7 @@ struct EnvelopeEditor<T>: View where T: FixedWidthInteger {
     public let levelMax: Int
 
     var body: some View {
-        HStack {
+        VStack {
             GeometryReader { (viewGeom) in
                 let envRect = viewGeom.frame(in: .local).insetBy(dx: 28, dy: 28)
                 let geometry = EnvelopeGeometry(envelope: envelope,
@@ -204,7 +197,7 @@ struct EnvelopeEditor<T>: View where T: FixedWidthInteger {
                     Handle(level: $envelope.L3, offset: geometry.p3.x, geometry: geometry)
                     Handle(level: $envelope.L4, offset: geometry.p4.x, geometry: geometry)
                 }
-            }.frame(width: 400, height: 300)
+            }.frame(width: 300, height: 180)
         }
     }
 }

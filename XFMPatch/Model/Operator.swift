@@ -26,11 +26,12 @@ final class Operator: ObservableObject {
     }
 
     @Published public var ratio: Float
-    @Published public var level: Float
+    @Published public var level: UInt8
+
     @Published public var mode: OperatorMode
     @Published public var frequency: Float
-    @Published public var detune: Int
-    @Published public var velocity:Int
+    @Published public var detune: Int8
+    @Published public var velocity: UInt8
 
     public let envelope: OperatorEnvelope
     public let scale: Scale
@@ -53,16 +54,16 @@ final class Operator: ObservableObject {
         level: UInt8,
         fixed: Bool,
         frequency: Float,
-        detune: Int,
-        velocity: Int,
+        detune: Int8,
+        velocity: UInt8,
         envelope: OperatorEnvelope,
         scale: Scale
     ) {
         self.ratio = ratio
-        self.level = Float(level)
+        self.level = level
         self.mode = fixed ? .Fixed : .Ratio
         self.frequency = frequency
-        self.detune = Int(detune)
+        self.detune = detune
         self.velocity = velocity
         self.envelope = envelope
         self.scale = scale
@@ -83,11 +84,11 @@ extension Operator: LivenDecodable {
     func updateFrom(liven: LivenDecodeType) {
         let (f, r, e, s, v, ts, c) = liven
         ratio = r.ratio
-        level = Float(r.level)
+        level = r.level
         mode = f.fixed ? .Fixed : .Ratio
         frequency = f.frequency
-        detune = Int(r.detune)
-        velocity = Int(v)
+        detune = r.detune
+        velocity = v
         envelope.updateFrom(liven: (e, ts, c))
         scale.updateFrom(liven: s)
     }

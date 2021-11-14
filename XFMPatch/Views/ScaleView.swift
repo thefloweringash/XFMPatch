@@ -1,19 +1,5 @@
 import SwiftUI
 
-struct GainSlider: View {
-    var label: String
-    @Binding var value: Float
-
-    var body: some View {
-        Slider(
-            value: $value,
-            in: -63.0...63.0,
-            step: 1.0,
-            label: { Text(label) }
-        )
-    }
-}
-
 struct CurvePicker: View {
     var label: String
     @Binding var value: Scale.CurveType
@@ -34,11 +20,17 @@ struct ScaleView: View {
         VStack {
             HStack {
                 VStack {
-                    GainSlider(label: "L-Gain", value: $scale.lGain)
+                    HStack {
+                        Text("L-Gain")
+                        IntKnob(range: -63...63, size: .Small, value: $scale.lGain)
+                    }
                     CurvePicker(label: "L-Curve", value: $scale.lCurve)
                 }
                 VStack {
-                    GainSlider(label: "R-Gain", value: $scale.rGain)
+                    HStack {
+                        Text("R-Gain")
+                        IntKnob(range: -63...63, size: .Small, value: $scale.rGain)
+                    }
                     CurvePicker(label: "R-Curve", value: $scale.rCurve)
                 }
             }
@@ -49,8 +41,6 @@ struct ScaleView: View {
             }.pickerStyle(.segmented)
 
         }
-        .fixedSize() // TODO: critical for performance
-
     }
 
 }

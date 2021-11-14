@@ -1,23 +1,32 @@
 import SwiftUI
 
 struct OperatorEditor: View {
-    @ObservedObject public var op: Operator
+    @ObservedObject var op: Operator
 
     var body: some View {
         VStack {
-            OperatorEnvelopeEditor(openv: op.envelope)
-
-            VStack {
-                Slider(
-                    value: $op.level,
-                    in: 0...127
-                ) {
+            HStack {
+                Group {
                     Text("Level")
-                } minimumValueLabel: {
-                    Text("0")
-                } maximumValueLabel: {
-                    Text("127")
+                    IntKnob(range: 0...127, size: .Small, value: $op.level)
                 }
+                Group {
+                    Text("Velocity")
+                    IntKnob(range: 0...127, size: .Small, value: $op.velocity)
+                }
+            }
+
+            Divider()
+
+            Group {
+                Text("Envelope").font(.subheadline)
+                OperatorEnvelopeEditor(openv: op.envelope)
+            }
+
+            Divider()
+
+            Group {
+                Text("Ratio and Frequency").font(.subheadline)
 
                 Picker("Mode", selection: $op.mode) {
                     ForEach(Operator.OperatorMode.allCases) { mode in
@@ -25,10 +34,7 @@ struct OperatorEditor: View {
                     }
                 }.pickerStyle(.segmented)
 
-                Slider(
-                    value: $op.ratio,
-                    in: 0.5...32.0
-                ) {
+                Slider(value: $op.ratio, in: 0.5...32.0) {
                     Text("Ratio")
                 } minimumValueLabel: {
                     Text("0.5")
@@ -38,8 +44,8 @@ struct OperatorEditor: View {
                 .disabled(op.mode != .Ratio)
 
                 HStack {
-                    Text("Detune: \(op.detune)")
-                    Text("Velocity Sens: \(op.velocity)")
+                    Text("Detune")
+                    IntKnob(range: -63...63, size: .Small, value: $op.detune)
                 }
 
                 Slider(
@@ -55,7 +61,12 @@ struct OperatorEditor: View {
                 .disabled(op.mode != .Fixed)
             }
 
-            ScaleView(scale: op.scale)
+            Divider()
+
+            Group {
+                Text("Key Scale").font(.subheadline)
+                ScaleView(scale: op.scale)
+            }
         }.fixedSize()
     }
 }
