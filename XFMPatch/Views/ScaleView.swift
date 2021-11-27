@@ -22,14 +22,14 @@ struct ScaleView: View {
                 VStack {
                     HStack {
                         Text("L-Gain")
-                        IntKnob(range: -63...63, size: .Small, value: $scale.lGain)
+                        IntKnob(value: $scale.lGain, in: -63...63)
                     }
                     CurvePicker(label: "L-Curve", value: $scale.lCurve)
                 }
                 VStack {
                     HStack {
                         Text("R-Gain")
-                        IntKnob(range: -63...63, size: .Small, value: $scale.rGain)
+                        IntKnob(value: $scale.rGain, in: -63...63)
                     }
                     CurvePicker(label: "R-Curve", value: $scale.rCurve)
                 }

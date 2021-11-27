@@ -113,8 +113,10 @@ struct Segs: Shape {
             d.segment(from: points[keyPath: s.from], to: points[keyPath: s.to])
         }
         if segments & (1 << 17) != 0 {
+            let r = Segs.gap * rect.height
             d.dot(size: Segs.gap * rect.height,
-                  points.br)
+                  CGPoint(x: points.br.x + r * 4,
+                          y: points.br.y - r * 2))
         }
         
         
@@ -152,11 +154,13 @@ struct Segs: Shape {
 }
 
 struct SegmentedString: View {
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
     struct SegCharacter: Identifiable {
         typealias ID = Int
         
         public let id: Int
-        public let segments: UInt32
+        public var segments: UInt32
     }
     
     enum Size {
@@ -175,6 +179,14 @@ struct SegmentedString: View {
         var height: CGFloat {
             width * 1.5
         }
+
+        var shadowRadius: CGFloat {
+            switch self {
+                case .Tiny: return 1
+                case .Small: return 2
+                case .Huge: return 18
+            }
+        }
     }
     
     public let size: Size
@@ -185,17 +197,25 @@ struct SegmentedString: View {
             ForEach(toCharacters(string)) { c in
                 ZStack {
                     let segs = Segs(segments: c.segments)
-                    segs.shadow(color: .red, radius: 18, x: 0, y: 0)
-                    segs.fill(.red)
+                    segs.shadow(color: isEnabled ? .blue : .gray, radius: size.shadowRadius, x: 0, y: 0)
+                    segs.fill(isEnabled ? .blue : .gray)
                 }.frame(width: size.width, height: size.height)
             }
-        }.background(.black)
+        }
     }
     
     private func toCharacters(_ string: String) -> [SegCharacter] {
-        string.enumerated().map { i, c in
-            SegCharacter(id: i, segments: sevenSegmentFont[c] ?? UInt32.max)
+        var result: [SegCharacter] = []
+
+        for (i, c) in string.enumerated() {
+            if c == "." && !result.isEmpty && result.last!.segments & (1 << 17) == 0 {
+                result[result.count - 1].segments |= 1 << 17
+            } else {
+                result.append(SegCharacter(id: i, segments: sevenSegmentFont[c] ?? UInt32.max))
+            }
         }
+
+        return result
     }
 }
 
@@ -221,6 +241,7 @@ class SmallSegsPreview: PreviewProvider {
             SegmentedString(size: .Small, string: "VWXYZ  ")
             SegmentedString(size: .Small, string: "1234567")
             SegmentedString(size: .Small, string: "890   a")
+            SegmentedString(size: .Small, string: "1.2..3.4")
         }
     }
 }

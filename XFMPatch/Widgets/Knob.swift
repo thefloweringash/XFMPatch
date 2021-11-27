@@ -36,18 +36,15 @@ struct KnobGeom {
                        y: center.y + y)
     }
 
-    public static func mapRange<U: FloatingPoint>(from: ClosedRange<U>, to: ClosedRange<U>, point: U) -> U {
-        let fromSize = from.upperBound - from.lowerBound
-        let toSize = to.upperBound - to.lowerBound
-
-        let fromOffset = point - from.lowerBound
-
-        return to.lowerBound + fromOffset * (toSize / fromSize)
+    public static func mapRange<U: BinaryFloatingPoint, T: BinaryFloatingPoint>(from: ClosedRange<U>, to: ClosedRange<T>, point: U) -> T {
+        let ratio = (to.upperBound - to.lowerBound) / T(from.upperBound - from.lowerBound)
+        let fromOffset = T(point - from.lowerBound)
+        return to.lowerBound + fromOffset * ratio
     }
 }
 
 struct KnobTrack: Shape {
-    public let range: ClosedRange<CGFloat>
+    public var range: ClosedRange<CGFloat>
     func path(in rect: CGRect) -> Path {
         var g = KnobGeom(frame: rect, range: range)
         var path = Path()
@@ -69,6 +66,19 @@ struct KnobTrack: Shape {
     }
 }
 
+extension KnobTrack: Animatable {
+    typealias AnimatableData = AnimatablePair<CGFloat, CGFloat>
+
+    var animatableData: AnimatableData {
+        get {
+            return .init(range.lowerBound, range.upperBound)
+        }
+        set(newValue) {
+            range = (newValue.first...newValue.second)
+        }
+    }
+}
+
 enum KnobSize {
     case Small
 
@@ -82,60 +92,72 @@ enum KnobSize {
 }
 
 struct Knob: View {
-    public let range: ClosedRange<CGFloat>
-    public let size: KnobSize
+    @Binding public var value: Float
+    public let `in`: ClosedRange<Float>
 
-    @Binding public var value: CGFloat
-    @GestureState public var valuePreview: CGFloat?
+    public var size: KnobSize = .Small
+    public var resetValue: Float = 0
+
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
+    @GestureState private var dragInitialValue: Float?
 
     var body: some View {
-        let dragScale = (range.upperBound - range.lowerBound) / 100
-        let dragLevel = DragGesture(minimumDistance: 0, coordinateSpace: .local)
-            .updating($valuePreview) { (gestureValue, state, transaction) in
-                state = clamp(value + CGFloat(-gestureValue.translation.height) * dragScale)
+        let dragScale = (`in`.upperBound - `in`.lowerBound) / 100
+        let dragLevel = DragGesture(minimumDistance: 1, coordinateSpace: .local)
+            .updating($dragInitialValue) { (gestureValue, state, transaction) in
+                state = state ?? value
             }
-            .onEnded { gestureValue in
-                value = clamp(value + CGFloat(-gestureValue.translation.height) * dragScale)
+            .onChanged { gestureValue in
+                value = clamp(dragInitialValue! + Float(-gestureValue.translation.height) * dragScale)
             }
+        let reset = TapGesture(count: 2).onEnded {
+            withAnimation(.easeInOut) {
+                value = resetValue
+            }
+        }
 
         ZStack {
-            KnobTrack(range: -1...1).stroke(.blue)
+            KnobTrack(range: -1...1).stroke(isEnabled ? .blue : .gray)
             KnobTrack(range: {
-                let mappedValue = KnobGeom.mapRange(from: range, to: -1...1, point: valuePreview ?? value)
-                let basis = KnobGeom.mapRange(from: range, to: -1...1, point: 0)
+                let mappedValue = KnobGeom.mapRange(from: `in`, to: -1...1, point: value)
+                let basis = KnobGeom.mapRange(from: `in`, to: -1...1, point: 0)
 
                 let lower = min(basis, mappedValue)
                 let upper = max(basis, mappedValue)
                 return lower...upper
-            }()).fill(.blue)
+            }()).fill(isEnabled ? .blue : .gray)
         }
         .frame(width: size.width, height: size.height)
-        .background()
-        .gesture(dragLevel)
+        .contentShape(Rectangle())
+        .gesture(dragLevel.exclusively(before: reset))
     }
 
-    private func clamp(_ value: CGFloat) -> CGFloat {
-        min(range.upperBound, max(range.lowerBound, value))
+    private func clamp(_ value: Float) -> Float {
+        min(`in`.upperBound, max(`in`.lowerBound, value))
     }
 }
 
+
 struct IntKnob<U: BinaryInteger>: View {
-    public let range: ClosedRange<U>
-    public let size: KnobSize
-
     @Binding public var value: U
+    public let `in`: ClosedRange<U>
 
-    private var floatValue: Binding<CGFloat> {
-        Binding<CGFloat>(
-            get: { return CGFloat(value) },
+    public var size: KnobSize = .Small
+    public var resetValue: U = 0
+
+    private var floatValue: Binding<Float> {
+        Binding<Float>(
+            get: { return Float(value) },
             set: { x in value = U(x) })
     }
 
     var body: some View {
         Knob(
-            range: CGFloat(range.lowerBound)...CGFloat(range.upperBound),
+            value: floatValue,
+            in: Float(`in`.lowerBound)...Float(`in`.upperBound),
             size: size,
-            value: floatValue
+            resetValue: Float(resetValue)
         )
     }
 }
@@ -143,12 +165,13 @@ struct IntKnob<U: BinaryInteger>: View {
 struct KnobPreview: PreviewProvider {
     static var previews: some View {
         Group {
-            Knob(range: -1.0...1.0, size: .Small, value: .constant(0.1))
-            Knob(range: -1.0...1.0, size: .Small, value: .constant(-0.1))
-            Knob(range: -48...48, size: .Small, value: .constant(-16))
-            Knob(range: -48...48, size: .Small, value: .constant(32))
-            Knob(range: 0...127, size: .Small, value: .constant(63))
-            IntKnob(range: 0...127, size: .Small, value: .constant(63))
+            Knob(value: .constant(0.1), in: -1.0...1.0)
+            Knob(value: .constant(-0.1), in: -1.0...1.0)
+            Knob(value: .constant(-16), in: -48...48)
+            Knob(value: .constant(32), in: -48...48)
+            Knob(value: .constant(63), in: 0...127)
+            Knob(value: .constant(63), in: 0...127)
+            IntKnob(value: .constant(63), in: 0...127)
         }
     }
 }

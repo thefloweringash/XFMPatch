@@ -15,37 +15,37 @@ struct PitchEGView: View {
             HStack {
                 Group {
                     Text("L1")
-                    IntKnob(range: -48...48, size: .Small, value: $envelope.L1)
+                    IntKnob(value: $envelope.L1, in: -48...48)
                 }
                 Group {
                     Text("L2")
-                    IntKnob(range: -48...48, size: .Small, value: $envelope.L2)
+                    IntKnob(value: $envelope.L2, in: -48...48)
                 }
                 Group {
                     Text("L3")
-                    IntKnob(range: -48...48, size: .Small, value: $envelope.L3)
+                    IntKnob(value: $envelope.L3, in: -48...48)
                 }
                 Group {
                     Text("L4")
-                    IntKnob(range: -48...48, size: .Small, value: $envelope.L4)
+                    IntKnob(value: $envelope.L4, in: -48...48)
                 }
             }
             HStack {
                 Group {
                     Text("T1")
-                    IntKnob(range: 0...127, size: .Small, value: $envelope.T1)
+                    IntKnob(value: $envelope.T1, in: 0...127)
                 }
                 Group {
                     Text("T2")
-                    IntKnob(range: 0...127, size: .Small, value: $envelope.T2)
+                    IntKnob(value: $envelope.T2, in: 0...127)
                 }
                 Group {
                     Text("T3")
-                    IntKnob(range: 0...127, size: .Small, value: $envelope.T3)
+                    IntKnob(value: $envelope.T3, in: 0...127)
                 }
                 Group {
                     Text("T4")
-                    IntKnob(range: 0...127, size: .Small, value: $envelope.T4)
+                    IntKnob(value: $envelope.T4, in: 0...127)
                 }
             }
             HStack {

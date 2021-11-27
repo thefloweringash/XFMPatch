@@ -17,51 +17,51 @@ struct OperatorEnvelopeEditor: View {
                 HStack {
                     Group {
                         Text("L1")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.L1)
+                        IntKnob(value: $envelope.L1, in: 0...127, resetValue: 127)
                     }
                     Group {
                         Text("L2")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.L2)
+                        IntKnob(value: $envelope.L2, in: 0...127, resetValue: 127)
                     }
                     Group {
                         Text("L3")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.L3)
+                        IntKnob(value: $envelope.L3, in: 0...127, resetValue: 127)
                     }
                     Group {
                         Text("L4")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.L4)
+                        IntKnob(value: $envelope.L4, in: 0...127)
                     }
                 }
                 HStack {
                     Group {
                         Text("T1")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.T1)
+                        IntKnob(value: $envelope.T1, in: 0...127)
                     }
                     Group {
                         Text("T2")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.T2)
+                        IntKnob(value: $envelope.T2, in: 0...127)
                     }
                     Group {
                         Text("T3")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.T3)
+                        IntKnob(value: $envelope.T3, in: 0...127)
                     }
                     Group {
                         Text("T4")
-                        IntKnob(range: 0...127, size: .Small, value: $envelope.T4)
+                        IntKnob(value: $envelope.T4, in: 0...127)
                     }
                 }
                 HStack {
                     Group {
                         Text("up crv")
-                        IntKnob(range: -18...18, size: .Small, value: $openv.upCrv)
+                        IntKnob(value: $openv.upCrv, in: -18...18)
                     }
                     Group {
                         Text("down crv")
-                        IntKnob(range: -18...18, size: .Small, value: $openv.downCrv)
+                        IntKnob(value: $openv.downCrv, in: -18...18)
                     }
                     Group {
                         Text("timescale")
-                        IntKnob(range: 0...127, size: .Small, value: $openv.timescale)
+                        IntKnob(value: $openv.timescale, in: 0...127)
                     }
                 }
             }

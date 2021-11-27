@@ -36,4 +36,5 @@ let sevenSegmentFont: [Character: UInt32] = [
   "9": 8647,
   "0": 57927,
   " ": 0,
+  ".": 65536,
 ]
