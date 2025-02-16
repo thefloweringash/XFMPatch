@@ -6,14 +6,14 @@ struct KnobGeom {
 
     init(frame: CGRect, range: ClosedRange<CGFloat>) {
         self.frame = frame
-        self.radius = 0.95 * min(frame.width, frame.height) / 2
+        radius = 0.95 * min(frame.width, frame.height) / 2
 
-        let myRange = 3/4 * CGFloat.pi ... (2 + 1/4) * CGFloat.pi
-        self.startAngle = Self.mapRange(from: -1...1, to: myRange, point: range.lowerBound)
-        self.endAngle = Self.mapRange(from: -1...1, to: myRange, point: range.upperBound)
+        let myRange = 3 / 4 * CGFloat.pi...(2 + 1 / 4) * CGFloat.pi
+        startAngle = Self.mapRange(from: -1...1, to: myRange, point: range.lowerBound)
+        endAngle = Self.mapRange(from: -1...1, to: myRange, point: range.upperBound)
 
-        self.center = CGPoint(x: frame.origin.x + frame.size.width / 2,
-                              y: frame.origin.y + frame.size.height / 2)
+        center = CGPoint(x: frame.origin.x + frame.size.width / 2,
+                         y: frame.origin.y + frame.size.height / 2)
     }
 
     public let startAngle: CGFloat
@@ -27,7 +27,6 @@ struct KnobGeom {
 
     lazy var ri: CGPoint = advance(angle: endAngle, distance: radius - gap)
     lazy var ro: CGPoint = advance(angle: endAngle, distance: radius)
-
 
     private func advance(angle: CGFloat, distance: CGFloat) -> CGPoint {
         let x: CGFloat = distance * cos(angle)
@@ -61,7 +60,6 @@ struct KnobTrack: Shape {
                     clockwise: true)
         path.addLine(to: g.lo)
 
-
         return path
     }
 }
@@ -71,7 +69,7 @@ extension KnobTrack: Animatable {
 
     var animatableData: AnimatableData {
         get {
-            return .init(range.lowerBound, range.upperBound)
+            .init(range.lowerBound, range.upperBound)
         }
         set(newValue) {
             range = (newValue.first...newValue.second)
@@ -83,11 +81,11 @@ enum KnobSize {
     case Small
 
     var height: CGFloat {
-        return 32
+        32
     }
 
     var width: CGFloat {
-        return 32
+        32
     }
 }
 
@@ -105,7 +103,7 @@ struct Knob: View {
     var body: some View {
         let dragScale = (`in`.upperBound - `in`.lowerBound) / 100
         let dragLevel = DragGesture(minimumDistance: 1, coordinateSpace: .local)
-            .updating($dragInitialValue) { (gestureValue, state, transaction) in
+            .updating($dragInitialValue) { gestureValue, state, transaction in
                 state = state ?? value
             }
             .onChanged { gestureValue in
@@ -138,7 +136,6 @@ struct Knob: View {
     }
 }
 
-
 struct IntKnob<U: BinaryInteger>: View {
     @Binding public var value: U
     public let `in`: ClosedRange<U>
@@ -148,8 +145,9 @@ struct IntKnob<U: BinaryInteger>: View {
 
     private var floatValue: Binding<Float> {
         Binding<Float>(
-            get: { return Float(value) },
-            set: { x in value = U(x) })
+            get: { Float(value) },
+            set: { x in value = U(x) }
+        )
     }
 
     var body: some View {

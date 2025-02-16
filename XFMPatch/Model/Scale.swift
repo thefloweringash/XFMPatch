@@ -34,12 +34,12 @@ extension Scale: LivenDecodable {
 
 extension Scale: LivenEncodable {
     func convertToLiven() -> LivenProto.Scale {
-        return .init(
-            lGain: self.lGain,
-            rGain: self.rGain,
-            lCurve: self.lCurve,
-            rCurve: self.rCurve,
-            scalePos: self.scalePos
+        .init(
+            lGain: lGain,
+            rGain: rGain,
+            lCurve: lCurve,
+            rCurve: rCurve,
+            scalePos: scalePos
         )
     }
 }

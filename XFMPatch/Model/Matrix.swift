@@ -30,14 +30,13 @@ final class Matrix: ObservableObject {
     init() {}
 
     private func clampFb(_ x: Float) -> Float {
-        return min(64, max(-63, x))
+        min(64, max(-63, x))
     }
 
     private func clampR(_ x: Float) -> Float {
-        return min(127, max(0, x))
+        min(127, max(0, x))
     }
 }
-
 
 extension Matrix: LivenDecodable {
     typealias LivenDecodeType = LivenProto.Matrix

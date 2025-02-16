@@ -8,7 +8,7 @@ final class OperatorEnvelope: ObservableObject {
     @Published public var upCrv: Int
     @Published public var downCrv: Int
 
-    convenience public init() {
+    public convenience init() {
         self.init(
             envelope: AmpEnvelope(l1: 127, t1: 0, l2: 127, t2: 0, l3: 127, t3: 0, l4: 0, t4: 0),
             timescale: 0,

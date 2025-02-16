@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SectionView<C: View> : View {
+struct SectionView<C: View>: View {
     public let title: String
     @ViewBuilder public let content: () -> C
 
@@ -30,7 +30,7 @@ struct SectionView<C: View> : View {
 struct SectionView_Preview: PreviewProvider {
     static var previews: some View {
         SectionView("Matrix") {
-          MatrixView(matrix: Matrix())
+            MatrixView(matrix: Matrix())
         }
     }
 }

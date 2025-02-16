@@ -13,19 +13,19 @@ public class LivenReader {
 
     private var buffer: Data
     init(withData data: Data) {
-        self.buffer = data
+        buffer = data
     }
 
     public func readInt<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
-        return T(truncatingIfNeeded: try readUInt(type.Magnitude, size: MemoryLayout<T>.size))
+        try T(truncatingIfNeeded: readUInt(type.Magnitude, size: MemoryLayout<T>.size))
     }
 
     public func readInt<T: FixedWidthInteger>(_ type: T.Type, size: Int) throws -> T {
-        return T(truncatingIfNeeded: try readUInt(type.Magnitude, size: size))
+        try T(truncatingIfNeeded: readUInt(type.Magnitude, size: size))
     }
 
     public func readType() throws -> LivenPacketType {
-        guard let result = LivenPacketType.init(rawValue: try self.readInt(UInt8.self)) else {
+        guard let result = try LivenPacketType(rawValue: readInt(UInt8.self)) else {
             throw ReaderError.UnknownPacket
         }
         return result
@@ -47,7 +47,7 @@ public class LivenReader {
         return result
     }
 
-    public func rest() -> Data{
+    public func rest() -> Data {
         let result = buffer
         buffer = buffer.advanced(by: buffer.count)
         return result
@@ -64,7 +64,7 @@ public class LivenReader {
             )
         }
 
-        let length = Int(try readInt(UInt32.self) - 8)
+        let length = try Int(readInt(UInt32.self) - 8)
 
         guard buffer.count >= length else {
             throw ReaderError.Underflow
@@ -76,8 +76,8 @@ public class LivenReader {
         return LivenReader(withData: subRange)
     }
 
-    public func readPascalString<T: FixedWidthInteger>(_ type: T.Type) throws -> String {
-        let length = Int(try readInt(type))
+    public func readPascalString(_ type: (some FixedWidthInteger).Type) throws -> String {
+        let length = try Int(readInt(type))
         let body = try read(bytes: length)
         guard let result = String(data: body, encoding: .ascii) else {
             throw ReaderError.InvalidString

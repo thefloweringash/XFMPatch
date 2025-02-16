@@ -23,7 +23,7 @@ struct MatrixGeom {
     }
 
     public func inputsFrame() -> CGRect {
-        return CGRect.init(
+        CGRect(
             x: 0, y: 0,
             width: cols * cellSize + (cols - 1) * cellGap,
             height: headerSize
@@ -32,7 +32,7 @@ struct MatrixGeom {
 
     // Relative to inputsFrame
     func inputFrame(col: Int) -> CGRect {
-        return CGRect.init(
+        CGRect(
             x: CGFloat(col) * (cellSize + cellGap),
             y: 0,
             width: cellSize,
@@ -41,7 +41,7 @@ struct MatrixGeom {
     }
 
     public func outputsFrame() -> CGRect {
-        return CGRect.init(
+        CGRect(
             x: cols * (cellSize + cellGap),
             y: headerSize + cellGap,
             width: headerSize,
@@ -51,7 +51,7 @@ struct MatrixGeom {
 
     // Relative to outputsFrame
     func outputFrame(row: Int) -> CGRect {
-        return CGRect.init(
+        CGRect(
             x: 0,
             y: CGFloat(row) * (cellSize + cellGap),
             width: headerSize,
@@ -60,7 +60,7 @@ struct MatrixGeom {
     }
 
     public func cellsFrame() -> CGRect {
-        return CGRect.init(
+        CGRect(
             x: 0,
             y: headerSize + cellGap,
             width: cols * cellSize + (cols - 1) * cellGap,
@@ -69,16 +69,16 @@ struct MatrixGeom {
     }
 
     public func cellFrame(row: Int, col: Int) -> CGRect {
-        return CGRect.init(
+        CGRect(
             x: CGFloat(col) * (cellSize + cellGap),
             y: headerSize + cellGap + CGFloat(row) * (cellSize + cellGap),
             width: cellSize,
-            height: cellSize)
+            height: cellSize
+        )
     }
 }
 
 struct MatrixCell: View {
-
     @GestureState var levelPreview: Float? = nil
     @GestureState var updating = false
 
@@ -95,13 +95,12 @@ struct MatrixCell: View {
     public let backgroundColor: Color
     public let dragColor: Color
 
-
     var body: some View {
         let dragLevel = DragGesture(minimumDistance: 0, coordinateSpace: .local)
-            .updating($updating) { (value, state, transaction) in
+            .updating($updating) { value, state, transaction in
                 state = true
             }
-            .updating($levelPreview) { (value, state, transaction) in
+            .updating($levelPreview) { value, state, transaction in
                 state = clamp(level + Float(-value.translation.height))
             }
             .onEnded { value in
@@ -121,7 +120,7 @@ struct MatrixCell: View {
     }
 
     private func clamp(_ value: Float) -> Float {
-        return Swift.min(self.max, Swift.max(self.min, value))
+        Swift.min(self.max, Swift.max(self.min, value))
     }
 }
 

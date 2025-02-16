@@ -39,10 +39,8 @@ struct ScaleView: View {
                     Text(pos.description).tag(pos)
                 }
             }.pickerStyle(.segmented)
-
         }
     }
-
 }
 
 struct ScaleView_Preview: PreviewProvider {

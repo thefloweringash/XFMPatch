@@ -3,12 +3,12 @@ protocol LivenDecodable {
 
     init()
     init(withLiven: LivenDecodeType)
-    func updateFrom(liven: LivenDecodeType) -> Void
+    func updateFrom(liven: LivenDecodeType)
 }
 
 extension LivenDecodable {
     init(withLiven liven: LivenDecodeType) {
         self.init()
-        self.updateFrom(liven: liven)
+        updateFrom(liven: liven)
     }
 }

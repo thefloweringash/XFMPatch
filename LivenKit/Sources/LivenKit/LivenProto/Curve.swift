@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct Curve: LivenWritable {
+public extension LivenProto {
+    struct Curve: LivenWritable {
         public var up: Int8
         public var down: Int8
 

@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct BKDT: LivenWritable {
+public extension LivenProto {
+    struct BKDT: LivenWritable {
         static let containerName = "BKDT"
 
         enum Errors: Error {

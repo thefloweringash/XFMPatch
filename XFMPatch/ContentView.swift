@@ -12,7 +12,7 @@ struct ContentView: View {
     @EnvironmentObject public var patchStorage: PatchStorage
 
     var body: some View {
-        NavigationView() {
+        NavigationView {
             List(patchStorage.data) { p in
                 switch p {
                 case .Bank(let bank, serial: _):

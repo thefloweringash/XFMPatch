@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct Envelope<T>: LivenWritable where T: FixedWidthInteger {
+public extension LivenProto {
+    struct Envelope<T>: LivenWritable where T: FixedWidthInteger {
         public var times: PerOp<UInt8>
         public var levels: PerOp<T>
 
@@ -22,6 +22,6 @@ extension LivenProto {
         }
     }
 
-    public typealias PitchEnvelope = Envelope<Int8>
-    public typealias AmpEnvelope = Envelope<UInt8>
+    typealias PitchEnvelope = Envelope<Int8>
+    typealias AmpEnvelope = Envelope<UInt8>
 }

@@ -1,15 +1,15 @@
-import XCTest
 @testable import LivenKit
+import XCTest
 
 class LivenWriterTests: XCTestCase {
-    private var writer: LivenWriter = LivenWriter()
+    private var writer: LivenWriter = .init()
 
     override func setUp() {
         writer = LivenWriter()
     }
 
     public func toReader() -> LivenReader {
-        return LivenReader(withData: writer.get())
+        LivenReader(withData: writer.get())
     }
 
     func roundTripUInt<T>(_ x: T) throws -> T where T: FixedWidthInteger {
@@ -30,7 +30,7 @@ class LivenWriterTests: XCTestCase {
     func testWriteUInt32() throws {
         let uint32: [UInt32] = [
             UInt32.min, UInt32.max,
-            0x12345678, 0xff000000, 0x000000ff
+            0x1234_5678, 0xFF00_0000, 0x0000_00FF,
         ]
 
         for c in uint32 {
@@ -39,7 +39,7 @@ class LivenWriterTests: XCTestCase {
     }
 
     func testWriteUInt8() throws {
-        let uint8: [UInt8] = [UInt8.min, UInt8.max, 0x0f]
+        let uint8: [UInt8] = [UInt8.min, UInt8.max, 0x0F]
 
         for c in uint8 {
             XCTAssertEqual(try roundTripUInt(c), c)
@@ -47,7 +47,7 @@ class LivenWriterTests: XCTestCase {
     }
 
     func testWriteUInt24() throws {
-        let uint24: [UInt32] = [0x00ff0000]
+        let uint24: [UInt32] = [0x00FF_0000]
 
         for c in uint24 {
             XCTAssertEqual(try roundTripUInt(c, size: 3), c)
@@ -70,7 +70,7 @@ class LivenWriterTests: XCTestCase {
     }
 
     func testContainerWriterUnbounded() throws {
-        let x: UInt32 = 0x12345678;
+        let x: UInt32 = 0x1234_5678
         try writer.writeContainer(fourCC: "FMNM") { subw in
             try subw.writeInt(x)
         }
@@ -79,11 +79,11 @@ class LivenWriterTests: XCTestCase {
     }
 
     func testContainerWriterPadding() throws {
-        try writer.writeContainer(fourCC: "FMNM", size: 24, pad: 0xff) { subw in
+        try writer.writeContainer(fourCC: "FMNM", size: 24, pad: 0xFF) { subw in
             try subw.writeInt(UInt8(0x60))
         }
         let y = try toReader().containerReader(fourCC: "FMNM").readInt(UInt32.self)
-        XCTAssertEqual(0xffffff60, y)
+        XCTAssertEqual(0xFFFF_FF60, y)
     }
 
     func testContainerWriterChecking() throws {

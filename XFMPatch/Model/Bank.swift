@@ -21,15 +21,13 @@ final class Bank: ObservableObject {
     }
 }
 
-
 extension Bank: LivenDecodable {
     func updateFrom(liven bank: LivenProto.FMBC) {
-        self.name = bank.fmnm.name
+        name = bank.fmnm.name
         for (i, p) in bank.bkdt.patches.enumerated() {
             patches[i].updateFrom(liven: p)
         }
     }
 
     typealias LivenDecodeType = LivenProto.FMBC
-
 }

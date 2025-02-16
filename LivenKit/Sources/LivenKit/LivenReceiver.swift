@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 public class LivenReceiver {
     enum State {
@@ -18,9 +18,7 @@ public class LivenReceiver {
 
     public var inboundTransfers = PassthroughSubject<AnyLivenStruct, Never>()
 
-    public init() {
-        
-    }
+    public init() {}
 
     // MARK: - Reading Bytes
 
@@ -33,7 +31,7 @@ public class LivenReceiver {
 
         var base: T.SubSequence = bytes.suffix(from: 0)
         while !base.isEmpty {
-            if (!inMessage) {
+            if !inMessage {
                 // Must be an 0xF0 to trigger anything
                 guard base.first == 0xF0 else { return }
                 inMessage = true
@@ -43,7 +41,7 @@ public class LivenReceiver {
             if let endOfMessage = base.firstIndex(of: 0xF7) {
                 buffer.append(contentsOf: base.prefix(through: endOfMessage))
 
-                self.onUnpackedPacket(buffer)
+                onUnpackedPacket(buffer)
 
                 buffer = Data()
                 inMessage = false
@@ -55,8 +53,8 @@ public class LivenReceiver {
         }
     }
 
-    internal func combineHighBits<T: Collection>(_ data: T) -> Data where T.Element == UInt8 {
-        var buf = Data.init()
+    func combineHighBits(_ data: some Collection<UInt8>) -> Data {
+        var buf = Data()
 
         var base = data.dropFirst(0)
 
@@ -80,11 +78,11 @@ public class LivenReceiver {
         return buf
     }
 
-    private func onUnpackedPacket<T: Collection>(_ bytes: T) where T.Element == UInt8 {
+    private func onUnpackedPacket(_ bytes: some Collection<UInt8>) {
         // print("onUnpackedPacket(\(self.hex(bytes))")
 
-        let base = bytes.dropFirst().prefix { $0 != 0xf7 }
-        self.onPacket(combineHighBits(base))
+        let base = bytes.dropFirst().prefix { $0 != 0xF7 }
+        onPacket(combineHighBits(base))
     }
 
     // MARK: - Reading Packets
@@ -106,20 +104,20 @@ public class LivenReceiver {
 
             switch try reader.readType() {
             case .Header:
-                self.header = try LivenProto.HeaderPacket.init(withReader: reader)
-                self.body = Data()
+                self.header = try LivenProto.HeaderPacket(withReader: reader)
+                body = Data()
             case .Body:
                 guard self.header != nil else {
                     throw ReceiverError.UnmatchedBody
                 }
-                self.body.append(reader.rest())
+                body.append(reader.rest())
             case .Footer:
                 guard let header = self.header else {
                     throw ReceiverError.UnmatchedFooter
                 }
                 let footer = try LivenProto.FooterPacket(withReader: reader)
 
-                self.onTransfer(header: header, body: self.body, footer: footer)
+                onTransfer(header: header, body: body, footer: footer)
             }
         } catch {
             print("Error handling packet: \(error)")
@@ -129,10 +127,10 @@ public class LivenReceiver {
     private func debugDump(header: LivenProto.HeaderPacket, body: Data, footer: LivenProto.FooterPacket) throws {
         let dir = try FileManager.default.url(
             for: .itemReplacementDirectory,
-               in: .userDomainMask,
-               appropriateFor: URL(fileURLWithPath: "/Users/"),
-               create: true)
-
+            in: .userDomainMask,
+            appropriateFor: URL(fileURLWithPath: "/Users/"),
+            create: true
+        )
 
         let description = """
           Header:
@@ -160,7 +158,8 @@ public class LivenReceiver {
                 "/Users/lorne/src/liven-xfm/firmware/bank.py",
                 patch.path,
             ],
-            terminationHandler: nil)
+            terminationHandler: nil
+        )
     }
 
     // MARK: - Handling completed transfers
@@ -190,10 +189,9 @@ public class LivenReceiver {
                 throw ReceiverError.ChecksumMismatch(expected: footer.checksum, actual: checksum)
             }
 
-            inboundTransfers.send(try container.decode(withData: body))
+            try inboundTransfers.send(container.decode(withData: body))
         } catch {
             print("Received transfer but could not decode patch: \(error)")
         }
     }
-
 }

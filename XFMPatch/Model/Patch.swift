@@ -45,7 +45,7 @@ final class Patch: ObservableObject, Identifiable {
 
 extension Patch: LivenDecodable {
     typealias LivenDecodeType = LivenProto.FMTC
-    
+
     public func updateFrom(liven fmtc: LivenProto.FMTC) {
         let tpdt = fmtc.tpdt
 

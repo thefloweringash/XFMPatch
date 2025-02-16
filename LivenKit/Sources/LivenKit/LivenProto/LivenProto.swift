@@ -1,17 +1,17 @@
-public struct LivenProto {
+public enum LivenProto {
     public typealias PerOp<T> = (T, T, T, T)
 
-    public static func perOp<T>(f: () throws -> T ) rethrows -> PerOp<T> {
-        return (
-            try f(),
-            try f(),
-            try f(),
-            try f()
+    public static func perOp<T>(f: () throws -> T) rethrows -> PerOp<T> {
+        try (
+            f(),
+            f(),
+            f(),
+            f()
         )
     }
 
     public static func mapPerOp<T, U>(_ x: PerOp<T>, f: (_: T) -> U) -> PerOp<U> {
-        return (
+        (
             f(x.0),
             f(x.1),
             f(x.2),
@@ -47,12 +47,11 @@ public struct LivenProto {
 
     public static func fourCCToString(_ fourCC: UInt32) -> String {
         String(format: "%c%c%c%c",
-               (fourCC) & 0xff,
-               (fourCC >> 8) & 0xff,
-               (fourCC >> 16) & 0xff,
-               (fourCC >> 24) & 0xff)
+               fourCC & 0xFF,
+               (fourCC >> 8) & 0xFF,
+               (fourCC >> 16) & 0xFF,
+               (fourCC >> 24) & 0xFF)
     }
-
 
     public struct HeaderPacket: LivenCodable {
         public var unknown: UInt32

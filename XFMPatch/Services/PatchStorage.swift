@@ -9,8 +9,8 @@ class PatchStorage: ObservableObject {
 
         var id: Int {
             switch self {
-            case .Bank(_, let serial): return serial
-            case .Patch(_, let serial): return serial
+            case let .Bank(_, serial): return serial
+            case let .Patch(_, serial): return serial
             }
         }
     }
@@ -20,7 +20,7 @@ class PatchStorage: ObservableObject {
     private var serial = 1
 
     init() {
-        data = [ .Patch(Patch(), serial: 0) ]
+        data = [.Patch(Patch(), serial: 0)]
     }
 
     func append(bank: Bank) {

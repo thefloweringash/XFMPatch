@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct FMNM: LivenWritable {
+public extension LivenProto {
+    struct FMNM: LivenWritable {
         static let containerName = "FMNM"
 
         public var boop1: UInt32 = 0
@@ -12,7 +12,7 @@ extension LivenProto {
         }
 
         public func write(toWriter outer: LivenWriter) throws {
-            try outer.writeContainer(fourCC: Self.containerName, size: 20, pad: 0xff) { w in
+            try outer.writeContainer(fourCC: Self.containerName, size: 20, pad: 0xFF) { w in
                 try w.writeInt(boop1)
                 try w.writePascalString(UInt32.self, name)
             }

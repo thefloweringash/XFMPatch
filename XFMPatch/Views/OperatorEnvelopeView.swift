@@ -6,7 +6,7 @@ struct OperatorEnvelopeEditor: View {
 
     init(openv: OperatorEnvelope) {
         self.openv = openv
-        self.envelope = openv.envelope
+        envelope = openv.envelope
     }
 
     var body: some View {
@@ -68,7 +68,6 @@ struct OperatorEnvelopeEditor: View {
         }
     }
 }
-
 
 struct OperatorEnvelopeEditor_Previews: PreviewProvider {
     static var previews: some View {

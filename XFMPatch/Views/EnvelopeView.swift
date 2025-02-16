@@ -21,7 +21,7 @@ struct KeyArea: Shape {
             height: envelopeGeometry.boundingRect.height
         ))
 
-        return path;
+        return path
     }
 }
 
@@ -49,7 +49,7 @@ struct EnvelopeShape: Shape {
         path.addLine(to: envelopeGeometry.p3)
         path.addLine(to: envelopeGeometry.p4)
 
-        return path;
+        return path
     }
 }
 
@@ -79,7 +79,7 @@ struct ZeroLine: Shape {
         path.addLine(to: .init(x: bounds.origin.x + bounds.size.width,
                                y: y))
 
-        return path;
+        return path
     }
 }
 
@@ -90,17 +90,17 @@ struct EnvelopeGeometry {
         private let levelMin: Int
         private let levelMax: Int
 
-        init<T>(envelope: Envelope<T>, levelMin: Int, levelMax: Int, boundingRect: CGRect) where T: FixedWidthInteger {
+        init(envelope: Envelope<some FixedWidthInteger>, levelMin: Int, levelMax: Int, boundingRect: CGRect) {
             self.levelMin = levelMin
             self.levelMax = levelMax
             self.boundingRect = boundingRect
 
-            self.timeTotal =
+            timeTotal =
                 Self.timescale(envelope.T1) +
                 Self.timescale(envelope.T2) +
                 Self.timescale(envelope.T3) +
                 Self.timescale(envelope.T4)
-            }
+        }
 
         public func yToLevel(_ y: CGFloat) -> Int {
             let scale = CGFloat(levelMax - levelMin) / boundingRect.size.height
@@ -114,26 +114,26 @@ struct EnvelopeGeometry {
         }
 
         public func timeToX(_ times: [Int]) -> CGFloat {
-            let result = times.map(Self.timescale).reduce(0, { $0 + $1 })
+            let result = times.map(Self.timescale).reduce(0) { $0 + $1 }
             return boundingRect.origin.x + boundingRect.size.width * CGFloat(result) / timeTotal
         }
 
         public func timeToX(_ times: Int...) -> CGFloat {
-            let result = times.map(Self.timescale).reduce(0, { $0 + $1 })
+            let result = times.map(Self.timescale).reduce(0) { $0 + $1 }
             return boundingRect.origin.x + boundingRect.size.width * CGFloat(result) / timeTotal
         }
 
         private static func timescale(_ time: Int) -> CGFloat {
-            return (CGFloat(time) + 10) / 100
+            (CGFloat(time) + 10) / 100
         }
     }
 
     public let boundingRect: CGRect
     private let mapper: Mapper
 
-    init<T>(envelope: Envelope<T>, levelMin: Int, levelMax: Int, boundingRect: CGRect) where T: FixedWidthInteger {
+    init(envelope: Envelope<some FixedWidthInteger>, levelMin: Int, levelMax: Int, boundingRect: CGRect) {
         self.boundingRect = boundingRect
-        self.mapper = Mapper(envelope: envelope, levelMin: levelMin, levelMax: levelMax, boundingRect: boundingRect)
+        mapper = Mapper(envelope: envelope, levelMin: levelMin, levelMax: levelMax, boundingRect: boundingRect)
 
         start = CGPoint(x: boundingRect.origin.x, y: mapper.levelToY(0))
 
@@ -167,15 +167,15 @@ struct EnvelopeGeometry {
     public var p4: CGPoint
 
     public func yToLevel(_ y: CGFloat) -> Int {
-        return mapper.yToLevel(y)
+        mapper.yToLevel(y)
     }
 
     public func levelToY(_ level: Int) -> CGFloat {
-        return mapper.levelToY(level)
+        mapper.levelToY(level)
     }
 
     public func timeToX(_ times: Int...) -> CGFloat {
-        return mapper.timeToX(times)
+        mapper.timeToX(times)
     }
 }
 
@@ -201,7 +201,7 @@ extension EnvelopeGeometry: Animatable {
 
     struct EnvelopeAnimatableData: VectorArithmetic {
         static func == (lhs: EnvelopeGeometry.EnvelopeAnimatableData, rhs: EnvelopeGeometry.EnvelopeAnimatableData) -> Bool {
-            return lhs.points == rhs.points
+            lhs.points == rhs.points
         }
 
         public var points: (
@@ -221,7 +221,7 @@ extension EnvelopeGeometry: Animatable {
         }
 
         var magnitudeSquared: Double {
-            return points.0.magnitudeSquared + points.1.magnitudeSquared + points.2.magnitudeSquared + points.3.magnitudeSquared
+            points.0.magnitudeSquared + points.1.magnitudeSquared + points.2.magnitudeSquared + points.3.magnitudeSquared
         }
 
         static var zero: EnvelopeGeometry.EnvelopeAnimatableData = .init(
@@ -266,10 +266,10 @@ struct Handle: View {
 
     var body: some View {
         let changeLevel = DragGesture(minimumDistance: 0)
-            .onChanged { (state) in
+            .onChanged { state in
                 level = geometry.yToLevel(state.location.y)
             }
-            .onEnded { (state) in
+            .onEnded { state in
                 level = geometry.yToLevel(state.location.y)
             }
 
@@ -293,14 +293,14 @@ struct EnvelopeEditor<T>: View where T: FixedWidthInteger {
 
     var body: some View {
         VStack {
-            GeometryReader { (viewGeom) in
+            GeometryReader { viewGeom in
                 let envRect = viewGeom.frame(in: .local).insetBy(dx: 28, dy: 28)
                 let geometry = EnvelopeGeometry(envelope: envelope,
                                                 levelMin: levelMin,
                                                 levelMax: levelMax,
                                                 boundingRect: envRect)
 
-                ZStack() {
+                ZStack {
                     GridBackground(envelopeGeometry: geometry)
 
                     if levelMin != 0 {
@@ -318,7 +318,6 @@ struct EnvelopeEditor<T>: View where T: FixedWidthInteger {
         }
     }
 }
-
 
 struct EnvelopeEditor_Previews: PreviewProvider {
     static var previews: some View {

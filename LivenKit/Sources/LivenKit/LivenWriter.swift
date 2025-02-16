@@ -29,7 +29,7 @@ public class LivenWriter {
 
         var totalSize = containerData.count + 8
 
-        if let size = size {
+        if let size {
             if totalSize > size {
                 throw WriterError.ContainerOverflow(expected: size, actual: totalSize)
             }
@@ -38,8 +38,8 @@ public class LivenWriter {
                 throw WriterError.ContainerUnderflow(expected: size, actual: totalSize)
             }
 
-            if let pad = pad {
-                for _ in 0..<(size-totalSize) {
+            if let pad {
+                for _ in 0..<(size - totalSize) {
                     containerData.append(pad)
                 }
                 totalSize = size
@@ -63,7 +63,7 @@ public class LivenWriter {
         buffer.append(data)
     }
 
-    public func writeBytes<T: Collection>(_ bytes: T) where T.Element == UInt8 {
+    public func writeBytes(_ bytes: some Collection<UInt8>) {
         buffer.append(contentsOf: bytes)
     }
 
@@ -82,7 +82,7 @@ public class LivenWriter {
         var x = val
 
         for _ in 0..<size {
-            buffer.append(UInt8(x & 0xff))
+            buffer.append(UInt8(x & 0xFF))
             x >>= 8
         }
     }

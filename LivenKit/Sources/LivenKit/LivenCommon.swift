@@ -11,7 +11,7 @@ public enum LivenPacketType: UInt8, LivenWritable {
     }
 }
 
-public let LivenPacketHeader: Data = Data.init(base64Encoded: "SAQAAANg")!
+public let LivenPacketHeader: Data = .init(base64Encoded: "SAQAAANg")!
 
 public enum AnyLivenPacket: LivenWritable {
     case Header(_: LivenProto.HeaderPacket)
@@ -39,11 +39,10 @@ public enum AnyLivenPacket: LivenWritable {
         case let .Footer(f): try f.write(toWriter: w)
         }
     }
-
 }
 
 public protocol LivenWritable {
-    func write(toWriter w: LivenWriter) throws -> Void
+    func write(toWriter w: LivenWriter) throws
 }
 
 extension LivenWritable {
@@ -58,9 +57,7 @@ public protocol LivenReadable {
     init(withReader r: LivenReader) throws
 }
 
-public protocol LivenCodable: LivenWritable, LivenReadable {
-
-}
+public protocol LivenCodable: LivenWritable, LivenReadable {}
 
 public enum AnyLivenStruct {
     case Name(_: LivenProto.FMNM)
@@ -113,15 +110,15 @@ public enum LivenStructType: String {
 
     var crcXorIn: UInt32? {
         switch self {
-        case .TemplateContainer: return 0x6046f7ed
-        case .BankContainer: return 0xfb01478d
+        case .TemplateContainer: return 0x6046_F7ED
+        case .BankContainer: return 0xFB01_478D
         default:
             return nil
         }
     }
 
     var initVal: UInt32? {
-        guard let crcXorIn = self.crcXorIn else { return nil }
+        guard let crcXorIn else { return nil }
         return ~crcXorIn
     }
 
@@ -132,7 +129,7 @@ public enum LivenStructType: String {
         case .BankContainer:
             return 1
         default:
-             return nil
+            return nil
         }
     }
 
@@ -144,21 +141,21 @@ public enum LivenStructType: String {
         let r = LivenReader(withData: buf)
         switch self {
         case .Name:
-            return .Name(try LivenProto.FMNM(withReader: r))
+            return try .Name(LivenProto.FMNM(withReader: r))
         case .BankContainer:
-            return .BankContainer(try LivenProto.FMBC(withReader: r))
+            return try .BankContainer(LivenProto.FMBC(withReader: r))
         case .TemplateContainer:
-            return .TemplateContainer(try LivenProto.FMTC(withReader: r))
+            return try .TemplateContainer(LivenProto.FMTC(withReader: r))
         case .BankData:
-            return .BankData(try LivenProto.BKDT(withReader: r))
+            return try .BankData(LivenProto.BKDT(withReader: r))
         case .TemplateData:
-            return .TemplateData(try LivenProto.TPDT(withReader: r))
+            return try .TemplateData(LivenProto.TPDT(withReader: r))
         }
     }
 }
 
 func checksum(initVal: UInt32, buf: Data) -> UInt32 {
-    return buf.withUnsafeBytes { (p: UnsafePointer<Bytef>) -> UInt32 in
+    buf.withUnsafeBytes { (p: UnsafePointer<Bytef>) -> UInt32 in
         // This may seem like a magic constant, but it's more likely a constant prefix
         // that I have yet determine.
         return UInt32(crc32(uLong(initVal), p, UInt32(buf.count)))

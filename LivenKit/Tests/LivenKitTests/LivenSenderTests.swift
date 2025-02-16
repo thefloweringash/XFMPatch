@@ -1,32 +1,32 @@
-import XCTest
 import Combine
 @testable import LivenKit
+import XCTest
 
 class LivenSenderTests: XCTestCase {
     private let sender = LivenSender()
     private let receiver = LivenReceiver()
     private var lastTransfer: AnyLivenStruct?
-    private var cancellables = Set<AnyCancellable>();
+    private var cancellables = Set<AnyCancellable>()
 
     override func setUp() {
         receiver.inboundTransfers.sink { [weak self] s in
-            guard let self = self else { return }
-            self.lastTransfer = s
+            guard let self else { return }
+            lastTransfer = s
         }.store(in: &cancellables)
     }
 
     public func testBitSplittingSmall() {
-        let testData = Data([0xff, 0xff])
+        let testData = Data([0xFF, 0xFF])
 
         let split = sender.splitHighBits(testData)
-        XCTAssertEqual(Data([1 << 6 | 1 << 5, 0x7f, 0x7f]), split)
+        XCTAssertEqual(Data([1 << 6 | 1 << 5, 0x7F, 0x7F]), split)
     }
 
     public func testsBitCombiningSmall() {
-        let testData = Data([1 << 6 | 1 << 5, 0x7f, 0x7f])
+        let testData = Data([1 << 6 | 1 << 5, 0x7F, 0x7F])
 
         let split = receiver.combineHighBits(testData)
-        XCTAssertEqual(Data([0xff, 0xff]), split)
+        XCTAssertEqual(Data([0xFF, 0xFF]), split)
     }
 
     public func testBitPackingRandom() {

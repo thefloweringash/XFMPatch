@@ -7,7 +7,7 @@ public class LivenSender {
     }
 
     public func toSysEx(struct: AnyLivenStruct) throws -> Data {
-        return try toSysEx(`struct`.toWritable(), type: `struct`.structType())
+        try toSysEx(`struct`.toWritable(), type: `struct`.structType())
     }
 
     public func toSysEx(_ x: LivenWritable, type: LivenStructType) throws -> Data {
@@ -23,30 +23,30 @@ public class LivenSender {
 
         let header = LivenProto.HeaderPacket(unknown: headerUnknown, length: UInt32(data.count))
         let footer = LivenProto.FooterPacket(checksum: checksum(initVal: checksumInit, buf: data))
-        return try self.pack(.Header(header), .Body(data), .Footer(footer))
+        return try pack(.Header(header), .Body(data), .Footer(footer))
     }
 
     public func pack(_ packets: AnyLivenPacket...) throws -> Data {
         var buf = Data()
 
         for p in packets {
-            buf.append(wrapInSysEx(try p.toData()))
+            try buf.append(wrapInSysEx(p.toData()))
         }
 
         return buf
     }
 
-    internal func splitHighBits<T: Collection>(_ data: T) -> Data where T.Element == UInt8 {
+    func splitHighBits(_ data: some Collection<UInt8>) -> Data {
         var buf = Data()
         var p = data.dropFirst(0)
-        while (!p.isEmpty) {
+        while !p.isEmpty {
             let chunk = p.prefix(7)
 
             var highBits: UInt8 = 0
 
             let split = chunk.enumerated().map { i, b -> UInt8 in
                 highBits |= (b & 0x80) == 0 ? 0 : 1 << (6 - i)
-                return b & 0x7f
+                return b & 0x7F
             }
 
             buf.append(highBits)
@@ -60,9 +60,9 @@ public class LivenSender {
     private func wrapInSysEx(_ data: Data) -> Data {
         var buf = Data()
 
-        buf.append(0xf0)
+        buf.append(0xF0)
         buf.append(splitHighBits(data))
-        buf.append(0xf7)
+        buf.append(0xF7)
 
         return buf
     }

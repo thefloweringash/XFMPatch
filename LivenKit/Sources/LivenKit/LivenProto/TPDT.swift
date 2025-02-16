@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct TPDT: LivenWritable {
+public extension LivenProto {
+    struct TPDT: LivenWritable {
         static let containerName = "TPDT"
 
         public var boop1: UInt32 = 0

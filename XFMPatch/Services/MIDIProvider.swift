@@ -1,6 +1,6 @@
-import Foundation
-import CoreMIDI
 import Combine
+import CoreMIDI
+import Foundation
 import LivenKit
 
 struct MIDIPort: Identifiable {
@@ -12,13 +12,12 @@ struct MIDIPort: Identifiable {
 class MIDIProvider: ObservableObject {
     @Published public var selectedPort: Int? {
         didSet {
-            if let selectedPort = selectedPort {
+            if let selectedPort {
                 openPort(selectedPort)
             }
             print("set port to \(String(describing: oldValue)) -> \(String(describing: selectedPort))")
         }
     }
-
 
     @Published public var ports: [MIDIPort] = []
 
@@ -31,14 +30,13 @@ class MIDIProvider: ObservableObject {
 
     private var subscriptions = Set<AnyCancellable>()
 
-
     init() {
         initClient()
         enumSources()
 
-        receiver.inboundTransfers.sink { [weak self] (s) in
-            guard let self = self else { return }
-            self.receivedStruct.send(s)
+        receiver.inboundTransfers.sink { [weak self] s in
+            guard let self else { return }
+            receivedStruct.send(s)
         }.store(in: &subscriptions)
     }
 
@@ -49,23 +47,23 @@ class MIDIProvider: ObservableObject {
 
     private func initClient() {
         let notifyProc: MIDINotifyBlock = { [weak self] (event: UnsafePointer<MIDINotification>) in
-            guard let self = self else {
+            guard let self else {
                 return
             }
             let message = event.pointee.messageID
             if message == .msgObjectAdded || message == .msgObjectRemoved {
-                self.enumSources()
+                enumSources()
             }
             print("received midi notification: \(String(reflecting: event.pointee.messageID))")
         }
 
         try! checkOSStatus(
-            MIDIClientCreateWithBlock("LivenXFM Patch" as CFString, &self.midiClient, notifyProc)
+            MIDIClientCreateWithBlock("LivenXFM Patch" as CFString, &midiClient, notifyProc)
         )
 
         try! checkOSStatus(
-            MIDIInputPortCreateWithBlock(self.midiClient, "Input" as CFString, &self.midiInputPort) { (events: UnsafePointer<MIDIPacketList>, srcRefCon: UnsafeMutableRawPointer?) in
-                events.unsafeSequence().forEach { p in
+            MIDIInputPortCreateWithBlock(midiClient, "Input" as CFString, &midiInputPort) { (events: UnsafePointer<MIDIPacketList>, srcRefCon: UnsafeMutableRawPointer?) in
+                for p in events.unsafeSequence() {
                     self.receiver.onBytes(p.bytes())
                 }
             }
@@ -120,7 +118,7 @@ class MIDIProvider: ObservableObject {
 
     private func checkOSStatus(_ result: OSStatus) throws {
         if result != 0 {
-            throw NSError.init(domain: NSOSStatusErrorDomain, code: Int(result))
+            throw NSError(domain: NSOSStatusErrorDomain, code: Int(result))
         }
     }
 

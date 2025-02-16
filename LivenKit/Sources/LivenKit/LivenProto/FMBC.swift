@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct FMBC: LivenWritable {
+public extension LivenProto {
+    struct FMBC: LivenWritable {
         static let containerName = "FMBC"
 
         public var boop1: UInt32 = 0

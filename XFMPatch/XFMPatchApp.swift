@@ -11,9 +11,9 @@ struct XFMPatchApp: App {
                 .environmentObject(midiProvider)
                 .environmentObject(patchStorage)
                 .onReceive(midiProvider.receivedStruct) { s in
-                    if case .BankContainer(let fmbc) = s {
+                    if case let .BankContainer(fmbc) = s {
                         patchStorage.append(bank: Bank(withLiven: fmbc))
-                    } else if case .TemplateContainer(let fmtc) = s {
+                    } else if case let .TemplateContainer(fmtc) = s {
                         patchStorage.append(patch: Patch(withLiven: fmtc))
                     }
                 }

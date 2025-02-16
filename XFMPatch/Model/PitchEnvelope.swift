@@ -9,7 +9,7 @@ final class PitchEG: ObservableObject {
     @Published public var o3e: Bool
     @Published public var o4e: Bool
 
-    convenience public init() {
+    public convenience init() {
         self.init(
             envelope: PitchEnvelope(l1: 0, t1: 0, l2: 0, t2: 0, l3: 0, t3: 0, l4: 0, t4: 0),
             o1e: false,

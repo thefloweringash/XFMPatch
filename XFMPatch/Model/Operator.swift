@@ -13,9 +13,7 @@ final class Operator: ObservableObject {
         case Ratio = 1
         case Fixed = 2
 
-        var id: UInt8 {
-            get { self.rawValue }
-        }
+        var id: UInt8 { rawValue }
 
         var description: String {
             switch self {
@@ -61,7 +59,7 @@ final class Operator: ObservableObject {
     ) {
         self.ratio = ratio
         self.level = level
-        self.mode = fixed ? .Fixed : .Ratio
+        mode = fixed ? .Fixed : .Ratio
         self.frequency = frequency
         self.detune = detune
         self.velocity = velocity
@@ -96,21 +94,21 @@ extension Operator: LivenDecodable {
     public class func gatherParams(tpdt: LivenProto.TPDT, index: Index) -> LivenDecodeType {
         switch index {
         case .Op1: return (
-            tpdt.fixed.0, tpdt.ratio.0, tpdt.envelope.0, tpdt.scale.0,
-            tpdt.velocity.0, tpdt.timescale.0, tpdt.curve.0
-        )
+                tpdt.fixed.0, tpdt.ratio.0, tpdt.envelope.0, tpdt.scale.0,
+                tpdt.velocity.0, tpdt.timescale.0, tpdt.curve.0
+            )
         case .Op2: return (
-            tpdt.fixed.1, tpdt.ratio.1, tpdt.envelope.1, tpdt.scale.1,
-            tpdt.velocity.1, tpdt.timescale.1, tpdt.curve.1
-        )
+                tpdt.fixed.1, tpdt.ratio.1, tpdt.envelope.1, tpdt.scale.1,
+                tpdt.velocity.1, tpdt.timescale.1, tpdt.curve.1
+            )
         case .Op3: return (
-            tpdt.fixed.2, tpdt.ratio.2, tpdt.envelope.2, tpdt.scale.2,
-            tpdt.velocity.2, tpdt.timescale.2, tpdt.curve.2
-        )
+                tpdt.fixed.2, tpdt.ratio.2, tpdt.envelope.2, tpdt.scale.2,
+                tpdt.velocity.2, tpdt.timescale.2, tpdt.curve.2
+            )
         case .Op4: return (
-            tpdt.fixed.3, tpdt.ratio.3, tpdt.envelope.3, tpdt.scale.3,
-            tpdt.velocity.3, tpdt.timescale.3, tpdt.curve.3
-        )
+                tpdt.fixed.3, tpdt.ratio.3, tpdt.envelope.3, tpdt.scale.3,
+                tpdt.velocity.3, tpdt.timescale.3, tpdt.curve.3
+            )
         }
     }
 }

@@ -1,5 +1,5 @@
-extension LivenProto {
-    public struct Scale: LivenWritable {
+public extension LivenProto {
+    struct Scale: LivenWritable {
         enum ScaleError: Error {
             case InvalidCurves
             case InvalidScalePos
@@ -10,9 +10,7 @@ extension LivenProto {
             case Exponential = 1
 
             public var id: UInt8 {
-                get {
-                    self.rawValue
-                }
+                rawValue
             }
         }
 
@@ -26,9 +24,7 @@ extension LivenProto {
             case C7 = 6
 
             public var id: UInt8 {
-                get {
-                    self.rawValue
-                }
+                rawValue
             }
 
             public var description: String {
@@ -52,14 +48,14 @@ extension LivenProto {
         public var lCurve: CurveType {
             get { tryLCurve! }
             set {
-                curvesPacked = (curvesPacked & 0xf0) | newValue.rawValue
+                curvesPacked = (curvesPacked & 0xF0) | newValue.rawValue
             }
         }
 
         public var rCurve: CurveType {
             get { tryRCurve! }
             set {
-                curvesPacked = (curvesPacked & 0xf) | (newValue.rawValue << 4)
+                curvesPacked = (curvesPacked & 0xF) | (newValue.rawValue << 4)
             }
         }
 
@@ -72,7 +68,7 @@ extension LivenProto {
         ) {
             self.lGain = lGain
             self.rGain = rGain
-            self.curvesPacked = 0
+            curvesPacked = 0
             self.scalePos = scalePos
 
             self.lCurve = lCurve
@@ -84,7 +80,7 @@ extension LivenProto {
             rGain = try r.readInt(Int8.self)
             curvesPacked = try r.readInt(UInt8.self)
 
-            guard let parsedScalepos = ScalePos(rawValue: try r.readInt(UInt8.self)) else {
+            guard let parsedScalepos = try ScalePos(rawValue: r.readInt(UInt8.self)) else {
                 throw ScaleError.InvalidScalePos
             }
             scalePos = parsedScalepos
@@ -102,7 +98,7 @@ extension LivenProto {
         }
 
         private var tryLCurve: CurveType? {
-            CurveType(rawValue: curvesPacked & 0xf)
+            CurveType(rawValue: curvesPacked & 0xF)
         }
 
         private var tryRCurve: CurveType? {

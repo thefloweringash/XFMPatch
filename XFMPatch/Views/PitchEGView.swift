@@ -6,7 +6,7 @@ struct PitchEGView: View {
 
     init(eg: PitchEG) {
         self.eg = eg
-        self.envelope = eg.envelope
+        envelope = eg.envelope
     }
 
     var body: some View {
@@ -57,7 +57,6 @@ struct PitchEGView: View {
         }
     }
 }
-
 
 struct PitchEGView_Previews: PreviewProvider {
     static var previews: some View {
