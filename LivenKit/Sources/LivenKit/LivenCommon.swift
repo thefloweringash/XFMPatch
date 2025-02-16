@@ -155,9 +155,10 @@ public enum LivenStructType: String {
 }
 
 func checksum(initVal: UInt32, buf: Data) -> UInt32 {
-    buf.withUnsafeBytes { (p: UnsafePointer<Bytef>) -> UInt32 in
+    buf.withUnsafeBytes { (p: UnsafeRawBufferPointer) -> UInt32 in
         // This may seem like a magic constant, but it's more likely a constant prefix
         // that I have yet determine.
-        return UInt32(crc32(uLong(initVal), p, UInt32(buf.count)))
+        var b = p.bindMemory(to: Bytef.self)
+        return UInt32(crc32(uLong(initVal), &b, UInt32(b.count)))
     }
 }

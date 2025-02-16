@@ -8,6 +8,23 @@ struct MIDIPort: Identifiable {
     var name: String
 }
 
+struct MIDIClient: ~Copyable {
+    let _client: MIDIClientRef
+
+    init(name: String, body: @escaping (UnsafePointer<MIDINotification>) -> Void) throws {
+        var client: MIDIClientRef = 0
+        let result = MIDIClientCreateWithBlock(name as CFString, &client, body)
+
+        try checkOSStatus(result)
+
+        _client = client
+    }
+
+    deinit {
+        MIDIClientDispose(_client)
+    }
+}
+
 @MainActor
 class MIDIProvider: ObservableObject {
     @Published public var selectedPort: Int? {
@@ -21,7 +38,7 @@ class MIDIProvider: ObservableObject {
 
     @Published public var ports: [MIDIPort] = []
 
-    private var midiClient: MIDIClientRef = 0
+    private var midiClient: MIDIClient? = nil
     private var midiInputPort: MIDIPortRef = 0
     private var midiConnectedSource: MIDIEndpointRef = 0
     private var sourceRef: UnsafeMutableRawPointer = .allocate(byteCount: 1, alignment: 0)
@@ -34,9 +51,8 @@ class MIDIProvider: ObservableObject {
         initClient()
         enumSources()
 
-        receiver.inboundTransfers.sink { [weak self] s in
-            guard let self else { return }
-            receivedStruct.send(s)
+        receiver.inboundTransfers.sink { [weak self] in
+            self?.receivedStruct.send($0)
         }.store(in: &subscriptions)
     }
 
@@ -47,19 +63,16 @@ class MIDIProvider: ObservableObject {
 
     private func initClient() {
         let notifyProc: MIDINotifyBlock = { [weak self] (event: UnsafePointer<MIDINotification>) in
-            guard let self else {
-                return
-            }
+            guard let self else { return }
+            print("received midi notification: \(String(reflecting: event.pointee.messageID))")
+
             let message = event.pointee.messageID
             if message == .msgObjectAdded || message == .msgObjectRemoved {
                 enumSources()
             }
-            print("received midi notification: \(String(reflecting: event.pointee.messageID))")
         }
 
-        try! checkOSStatus(
-            MIDIClientCreateWithBlock("LivenXFM Patch" as CFString, &midiClient, notifyProc)
-        )
+        midiClient = try! MIDIClient(name: "LivenXFM Patch", body: notifyProc)
 
         try! checkOSStatus(
             MIDIInputPortCreateWithBlock(midiClient, "Input" as CFString, &midiInputPort) { (events: UnsafePointer<MIDIPacketList>, srcRefCon: UnsafeMutableRawPointer?) in
@@ -74,17 +87,14 @@ class MIDIProvider: ObservableObject {
         var ports: [MIDIPort] = []
 
         let sources = MIDIGetNumberOfSources()
-        for n in 0...sources {
+        for n in 0..<sources {
             let device = MIDIGetSource(n)
-            guard device != 0 else {
-                continue
-            }
-            // defer { MIDIEndpointDispose(device) } -- This breaks everything
+            guard device != 0 else { continue }
 
-            let name: UnsafeMutablePointer<Unmanaged<CFString>?> = .allocate(capacity: 1)
-            MIDIObjectGetStringProperty(device, kMIDIPropertyName, name)
+            var name: Unmanaged<CFString>? = nil
+            MIDIObjectGetStringProperty(device, kMIDIPropertyName, &name)
 
-            if let nameStr = name.pointee?.takeRetainedValue() {
+            if let nameStr = name?.takeUnretainedValue() {
                 ports.append(.init(id: n, name: nameStr as String))
             }
         }
@@ -116,11 +126,11 @@ class MIDIProvider: ObservableObject {
         midiConnectedSource = source
     }
 
-    private func checkOSStatus(_ result: OSStatus) throws {
-        if result != 0 {
-            throw NSError(domain: NSOSStatusErrorDomain, code: Int(result))
-        }
-    }
-
     public var receivedStruct = PassthroughSubject<AnyLivenStruct, Never>()
+}
+
+private func checkOSStatus(_ result: OSStatus) throws {
+    if result != 0 {
+        throw NSError(domain: NSOSStatusErrorDomain, code: Int(result))
+    }
 }
